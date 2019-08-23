@@ -41,6 +41,14 @@ void iDraw()
     {
         iShowBMP2(enemyArray[j].x, enemyArray[j].y, "enemy_ship.bmp", 0);
     }
+    
+    for (j=0; j<enemyNumber; j++)
+    {
+        for (i=0; i<50; i++)
+        {
+           iShowBMP2(enemyBeamArray[j][i].x, enemyBeamArray[j][i].y, "enemy_beam.bmp", 0);
+        }
+    }
 }
 
 
@@ -116,14 +124,27 @@ void enemyMove() ///to move the enemy
     }
 }
 
-void enemyBeamCreate() ///unsolved
+void enemyBeamCreate() ///has issues
 {
-
+    for (j=0; j<enemyNumber; j++)
+    {
+        for (i=0; i<50; i++)
+        {
+            enemyBeamArray[j][i].x = enemyArray[j].x-15;
+            enemyBeamArray[j][i].y = enemyArray[j].y+22;
+        }
+    }
 }
 
-void enemyBeamMove() ///unsolved
-{
-
+void enemyBeamMove() 
+{ ///beams that are generated later, do not make it to the end of screen
+    for (j=0; j<enemyNumber; j++)
+    {
+        for (i=0; i<50; i++)
+        {
+            enemyBeamArray[j][i].x -= 15;
+        }
+    }
 }
 
 int main()
