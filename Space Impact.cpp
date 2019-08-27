@@ -3,14 +3,16 @@
 #include <windows.h>
 
 #define MAX_ENEMY 500
-int mode=0, i, j, k;
+int mode=0, i, j, k, power=10, score=0;
 float intervalForNewEnemy=3000,intervalForEnemyMove=50, intervalForEnemyBeam=2000;
 float spaceship_pos_x=100, spaceship_pos_y=300;
+char scoreString[6], powerString[6];
 
 typedef struct
 {
     int x;
     int y;
+    int is_shoot;
 } BEAM;
 BEAM beamarray[1000];
 int beamIndex;
@@ -20,20 +22,21 @@ typedef struct
     int x, y;
     int alive;
 } ENEMY;
-ENEMY enemyArray[1000];
+ENEMY enemyArray[MAX_ENEMY];
 int enemyNumber;
 
 typedef struct
 {
     int x, y;
+    int is_shoot;
 } ENEMYBEAM;
-ENEMYBEAM enemyBeamArray[1000][50];
+ENEMYBEAM enemyBeamArray[MAX_ENEMY][50];
 int enemyBeamNumber;
 
 
-int checkWhetherHit(float x1, float y1, float x2, float y2)
-{
-    if ((x2-x1)<50 && x2-x1>0 && y2-y1>0 && y2-y1<50)
+int collision(float x1, float y1, float x2, float y2)
+{ ///(x1, y1) = position of beam; (x2, y2) = position of enemy spaceship
+    if ((x2-x1)<8 && (x2-x1)>0 && (y2-y1)>0 && (y2-y1)<4)
     {
         return 1;
     }
@@ -58,14 +61,36 @@ void iDraw()
 {
     iClear();
     iShowBMP(0, 0, "background.bmp");
+    iShowBMP(0, 600, "Menubar.bmp");
+
+    itoa(score, scoreString, 10);
+    iText(10,620,"Score : ", GLUT_BITMAP_HELVETICA_18);
+    iText(80,620, scoreString, GLUT_BITMAP_HELVETICA_18);
+
+    itoa(power, powerString, 10);
+    iText(10,645,"Power : ", GLUT_BITMAP_HELVETICA_18);
+    iText(80,645, powerString, GLUT_BITMAP_HELVETICA_18);
+
     iShowBMP2(spaceship_pos_x, spaceship_pos_y, "ship.bmp", 0);
 
     for (j=0; j<1000; j++)
     {
-        if (beamarray[j].x<=1320)
+        if (beamarray[j].is_shoot==1 && beamarray[j].x<=1320)
         {
             //iShowBMP2(beamarray[j].x, beamarray[j].y,"beam.bmp", 0);
             DrawMyBeam(beamarray[j].x, beamarray[j].y);
+            for (k=0; k<enemyNumber; k++) ///checks whether the bullet hits the enemy, if so, both of them go extinct
+            {
+                if (enemyArray[k].alive==1)
+                {
+                    if (beamarray[j].x>=enemyArray[k].x && beamarray[j].x<=enemyArray[k].x+50 && beamarray[j].y>=enemyArray[k].y && beamarray[j].y<=enemyArray[k].y+50)
+                    {
+                        enemyArray[k].alive = 0;
+                        beamarray[j].is_shoot = 0;
+                        score += 10;
+                    }
+                }
+            }
         }
     }
 
@@ -73,7 +98,7 @@ void iDraw()
     {
         for (j=0; j<enemyNumber; j++)
         {
-            if (enemyArray[j].alive!=0)
+            if (enemyArray[j].alive!=0) ///to make sure it has not been hit
             {
                 iShowBMP2(enemyArray[j].x, enemyArray[j].y, "enemy_ship.bmp", 0);
             }
@@ -81,12 +106,20 @@ void iDraw()
 
         for (j=0; j<enemyNumber; j++)
         {
-            if (enemyArray[j].alive!=0)
+            if (enemyArray[j].alive!=0) ///to make sure it has not been hit
             {
                 for (i=0; i<50; i++)
                 {
                    //iShowBMP2(enemyBeamArray[j][i].x, enemyBeamArray[j][i].y, "enemy_beam.bmp", 0);
-                   DrawEnemyBeam(enemyBeamArray[j][i].x, enemyBeamArray[j][i].y);
+                    if (enemyBeamArray[j][i].is_shoot==1)
+                    {
+                        DrawEnemyBeam(enemyBeamArray[j][i].x, enemyBeamArray[j][i].y);
+                        if (enemyBeamArray[j][i].x>spaceship_pos_x && enemyBeamArray[j][i].x<spaceship_pos_x+50 && enemyBeamArray[j][i].y>spaceship_pos_y && enemyBeamArray[j][i].y<spaceship_pos_y+50)
+                        {
+                            power--;
+                            enemyBeamArray[j][i].is_shoot = 0;
+                        }
+                    }
                 }
             }
         }
@@ -122,8 +155,8 @@ void iKeyboard(unsigned char key) ///to fire my beam
     {
         beamarray[beamIndex].x = spaceship_pos_x+50;
         beamarray[beamIndex].y = spaceship_pos_y+22.5;
+        beamarray[beamIndex].is_shoot = 1;
         beamIndex++;
-        beamIndex = beamIndex%1000;
     }
 }
 
@@ -132,6 +165,10 @@ void myBeamMove() ///to move my beam
     for (j=0; j<1000; j++)
     {
         beamarray[j].x += 20;
+        if (beamarray[j].x > 1310)
+        {
+            beamarray[j].is_shoot = 0;
+        }
     }
 }
 
@@ -147,7 +184,7 @@ void iSpecialKeyboard(unsigned char key) ///to move my spaceship
     }
     if (key == GLUT_KEY_UP)
     {
-        if (spaceship_pos_y+10<630) spaceship_pos_y+=10;
+        if (spaceship_pos_y+10<550) spaceship_pos_y+=10;
     }
     if (key == GLUT_KEY_DOWN)
     {
@@ -158,7 +195,7 @@ void iSpecialKeyboard(unsigned char key) ///to move my spaceship
 void newEnemyCreate() ///to create new enemy
 {
     enemyArray[enemyNumber].x = 1300;
-    enemyArray[enemyNumber].y = (rand()%50)*20;
+    enemyArray[enemyNumber].y = (rand()%580);
     enemyArray[enemyNumber].alive = 1;
     enemyNumber++;
 }
@@ -183,6 +220,7 @@ void enemyBeamCreate() ///to create beams for each individual enemy
                 {
                     enemyBeamArray[j][i].x = enemyArray[j].x-15;
                     enemyBeamArray[j][i].y = enemyArray[j].y+22;
+                    enemyBeamArray[j][i].is_shoot = 1;
                 }
             }
         }
