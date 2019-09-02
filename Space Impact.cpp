@@ -1,8 +1,10 @@
 #include "iGraphics.h"
 #include <math.h>
 #include <windows.h>
+#include <iostream>
+using namespace std;
 
-#define MAX_ENEMY 100
+#define MAX_ENEMY 50
 #define MAX_ENEMY_BEAM 10
 #define MAX_POWER 100
 #define MAX_BEAM 250
@@ -10,9 +12,9 @@
 int i, j, k, power=MAX_POWER, score=0, highScore = 0, max_beam_count = MAX_BEAM;
 float intervalForNewEnemy=3000,intervalForEnemyMove=50, intervalForEnemyBeam=2000, intervalForEnemyBeamMove=30;
 float spaceship_pos_x=100, spaceship_pos_y=300;
-float boss_pos_x, boss_pos_y, dy=2;
+float boss_pos_x=1000, boss_pos_y=400, dy=2;
 char scoreString[6], powerString[6], beamString[6];
-int gameMode = 2;  /// 1 = Menu; 2 = Game Window; 3 = High Score
+int gameMode = -1;  /// 1 = Menu; 2 = Game Window; 3 = High Score
 
 typedef struct
 {
@@ -81,20 +83,20 @@ void Menubar()
 
 void iDraw()
 {
-
-    if (gameMode==3)
+    if (gameMode==-1)
     {
-        char highScoreArray[6];
         iClear();
-        iShowBMP(0, 0, "pinkfloydback.bmp");
-        iSetColor(255, 255, 255);
-        iText(600, 300, "Your Score: ", GLUT_BITMAP_HELVETICA_18);
-        iFilledRectangle(500, 220, 300, 50);
-        iSetColor(0, 0, 0);
-        itoa(highScore, highScoreArray, 10);
-        iText(625, 235, scoreString, GLUT_BITMAP_TIMES_ROMAN_24);
+        iShowBMP(0, 0, "initialbackground.bmp");
+        iShowBMP2(200, 550, "title.bmp", 0);
+        iShowBMP2(490, 400, "1-newgame.bmp", 0);
+        iShowBMP2(535, 350, "2-story.bmp", 0);
+        iShowBMP2(450, 300, "3-instructions.bmp", 0);
+        iShowBMP2(470, 250, "4-highscore.bmp", 0);
+        iShowBMP2(520, 203, "5-credits.bmp", 0);
+        iShowBMP2(530, 30, "exit.bmp", 0);
     }
-    if (gameMode==2)
+
+    if (gameMode==1)
     {
         iClear();
         iShowBMP(0, 0, "background.bmp");
@@ -143,38 +145,29 @@ void iDraw()
             }
         }
 
-        for (j=0; j<beamIndex; j++) ///for shooting my beam
+        if (enemyNumber<MAX_ENEMY)
         {
-            if (beamarray[j].is_shoot==1 && beamarray[j].x<=1300)
+            for (j=0; j<beamIndex; j++) ///for shooting my beam
             {
-                DrawMyBeam(beamarray[j].x, beamarray[j].y);
-                for (k=0; k<enemyNumber; k++) ///checks whether the bullet hits the enemy, if so, both of them go extinct
+                if (beamarray[j].is_shoot==1 && beamarray[j].x<=1300)
                 {
-                    if (enemyArray[k].alive==1
-                        )
+                    DrawMyBeam(beamarray[j].x, beamarray[j].y);
+                    for (k=0; k<enemyNumber; k++) ///checks whether the bullet hits the enemy, if so, both of them go extinct
                     {
-                        if (beamarray[j].x>=enemyArray[k].x && beamarray[j].x<=enemyArray[k].x+50 && beamarray[j].y>=enemyArray[k].y && beamarray[j].y<=enemyArray[k].y+50)
+                        if (enemyArray[k].alive==1)
                         {
-                            enemyArray[k].alive = 0;
-                            beamarray[j].is_shoot = 0;
-                            score += 10;
+                            if (beamarray[j].x>=enemyArray[k].x && beamarray[j].x<=enemyArray[k].x+50 && beamarray[j].y>=enemyArray[k].y && beamarray[j].y<=enemyArray[k].y+50)
+                            {
+                                enemyArray[k].alive = 0;
+                                beamarray[j].is_shoot = 0;
+                                score += 10;
+                            }
                         }
                     }
                 }
             }
-        }
-
-        if (enemyNumber<MAX_ENEMY)
-        {
             for (j=0; j<enemyNumber; j++)
             {
-                /*if (enemyArray[j].x>spaceship_pos_x && enemyArray[j].x<spaceship_pos_x+50 && enemyArray[j].y>spaceship_pos_y && enemyArray[j].y<spaceship_pos_y+50)
-                {
-                    power--;
-                    enemyArray[j].alive = 0;
-                    continue;
-                }*/
-
                 if (enemyArray[j].alive!=0) ///to make sure it has not been hit
                 {
                     iShowBMP2(enemyArray[j].x, enemyArray[j].y, "enemy_ship.bmp", 0);
@@ -194,14 +187,24 @@ void iDraw()
             }
         }
 
-        if (enemyNumber>=MAX_ENEMY)
+        /*if (enemyNumber>=MAX_ENEMY) ///has issues, crushes window
         {
             iShowBMP2(boss_pos_x, boss_pos_y, "monster_lvl1.bmp", 0);
-        }
 
-        if (power<=0 || beamIndex==500)
+            for (j=0; j<beamIndex; j++) ///for shooting my beam
+            {
+                if (beamarray[j].is_shoot==1 && beamarray[j].x<=1300)
+                {
+                    DrawMyBeam(beamarray[j].x, beamarray[j].y);
+
+                    //if (beamarray[j].x>=enemyArray[k].x && beamarray[j].x<=enemyArray[k].x+50 && beamarray[j].y>=enemyArray[k].y && beamarray[j].y<=enemyArray[k].y+50)
+                }
+            }
+        }*/
+
+        if (power<=0 || beamIndex==max_beam_count) ///has issues, bullets gets negative
         {
-            gameMode = 3;
+            gameMode = 11;
             if (highScore < score)
             {
                 highScore = score;
@@ -209,6 +212,46 @@ void iDraw()
         }
     }
 
+    if (gameMode==2) ///sakib
+    {
+        iClear();
+        iShowBMP(0, 0, "story.bmp");
+        iShowBMP2(510, 30, "backtomenu.bmp", 0);
+    }
+
+    if (gameMode==3) ///sakib
+    {
+        iClear();
+        iShowBMP(0, 0, "instruction.bmp");
+        iShowBMP2(510, 30, "backtomenu.bmp", 0);
+    }
+
+    if (gameMode==4) ///sakib
+    {
+        iClear();
+        iText(100, 100, "High Score", GLUT_BITMAP_TIMES_ROMAN_24);
+        iShowBMP2(510, 30, "backtomenu.bmp", 0);
+    }
+
+    if (gameMode==5) ///sakib
+    {
+        iClear();
+        iText(100, 100, "Credits", GLUT_BITMAP_TIMES_ROMAN_24);
+        iShowBMP2(510, 30, "backtomenu.bmp", 0);
+    }
+
+    if (gameMode==11)
+    {
+        char highScoreArray[6];
+        iClear();
+        iShowBMP(0, 0, "pinkfloydback.bmp");
+        iSetColor(255, 255, 255);
+        iText(600, 300, "Your Score: ", GLUT_BITMAP_HELVETICA_18);
+        iFilledRectangle(500, 220, 300, 50);
+        iSetColor(0, 0, 0);
+        itoa(highScore, highScoreArray, 10);
+        iText(625, 235, scoreString, GLUT_BITMAP_TIMES_ROMAN_24);
+    }
 }
 
 void iMouseMove(int mx, int my)
@@ -220,6 +263,39 @@ void iMouse(int button, int state, int mx, int my)
 {
     if(button == GLUT_LEFT_BUTTON && state == GLUT_DOWN)
     {
+        if (gameMode==-1)
+        {
+            if (mx>=490 && mx<=730 && my>=400 && my<=430) gameMode = 1;
+            if (mx>=535 && mx<=680 && my>=350 && my<=380) gameMode = 2;
+            if (mx>=450 && mx<=773 && my>=300 && my<=330) gameMode = 3;
+            if (mx>=470 && mx<=750 && my>=250 && my<=280) gameMode = 4;
+            if (mx>=520 && mx<=700 && my>=203 && my<=230) gameMode = 5;
+
+            if (mx>=530 && mx<=680 && my>=30 && my<=80)
+            {
+                exit(0);
+            }
+        }
+
+        if (gameMode==2)
+        {
+            if (mx>=510 && mx<=750 && my>=30 && my<=59) gameMode = -1;
+        }
+
+        if (gameMode==3)
+        {
+            if (mx>=510 && mx<=750 && my>=30 && my<=59) gameMode = -1;
+        }
+
+        if (gameMode==4)
+        {
+            if (mx>=510 && mx<=750 && my>=30 && my<=59) gameMode = -1;
+        }
+
+        if (gameMode==5)
+        {
+            if (mx>=510 && mx<=750 && my>=30 && my<=59) gameMode = -1;
+        }
 
     }
     if(button == GLUT_RIGHT_BUTTON && state == GLUT_DOWN)
@@ -261,7 +337,7 @@ void iSpecialKeyboard(unsigned char key) ///to move my spaceship
 
 void myBeamMove() ///to move my beam
 {
-    for (j=0; j<MAX_BEAM; j++)
+    for (j=0; j<max_beam_count; j++)
     {
         beamarray[j].x += 20;
         if (beamarray[j].x > 1310)
@@ -347,7 +423,7 @@ void enemyBeamMove() ///to move beams of each individual enemy
     }
 }
 
-void bossMove()
+void bossMove() ///has issues
 {
     if (boss_pos_x>1100)
     {
@@ -371,7 +447,7 @@ int main()
     iSetTimer(intervalForEnemyMove, enemyMove);
     iSetTimer(intervalForEnemyBeam, enemyBeamCreate);
     iSetTimer(intervalForEnemyBeamMove, enemyBeamMove);
-    iSetTimer(50, bossMove);
+    //iSetTimer(50, bossMove);
 
     iInitialize(1300, 680, "Game Window!");
 
