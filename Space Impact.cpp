@@ -1,10 +1,18 @@
+/*
+To do list:
+1. Ask Sakib to complete his tasks
+2. Create "Pause", "Back to Menu", "Exit" menu in game window
+3. Work on saving high score
+4. complete boss-shooting, boss-getting-shot
+*/
+
 #include "iGraphics.h"
 #include <math.h>
 #include <windows.h>
 #include <iostream>
 using namespace std;
 
-#define MAX_ENEMY 50
+#define MAX_ENEMY 5
 #define MAX_ENEMY_BEAM 10
 #define MAX_POWER 100
 #define MAX_BEAM 250
@@ -187,7 +195,7 @@ void iDraw()
             }
         }
 
-        /*if (enemyNumber>=MAX_ENEMY) ///has issues, crushes window
+        if (enemyNumber>=MAX_ENEMY) ///has issues, crushes window
         {
             iShowBMP2(boss_pos_x, boss_pos_y, "monster_lvl1.bmp", 0);
 
@@ -200,7 +208,7 @@ void iDraw()
                     //if (beamarray[j].x>=enemyArray[k].x && beamarray[j].x<=enemyArray[k].x+50 && beamarray[j].y>=enemyArray[k].y && beamarray[j].y<=enemyArray[k].y+50)
                 }
             }
-        }*/
+        }
 
         if (power<=0 || beamIndex==max_beam_count) ///has issues, bullets gets negative
         {
@@ -373,10 +381,13 @@ void newEnemyCreate() ///to create new enemy; also creates lifePotion and beamPo
         bulletPotion.alive = 0;
     }
 
-    enemyArray[enemyNumber].x = 1300;
-    enemyArray[enemyNumber].y = (rand()%520);
-    enemyArray[enemyNumber].alive = 1;
-    enemyNumber++;
+    if (enemyNumber<MAX_ENEMY)
+    {
+        enemyArray[enemyNumber].x = 1300;
+        enemyArray[enemyNumber].y = (rand()%520);
+        enemyArray[enemyNumber].alive = 1;
+        enemyNumber++;
+    }
 }
 
 void enemyMove() ///to move the enemy; ok
@@ -423,7 +434,7 @@ void enemyBeamMove() ///to move beams of each individual enemy
     }
 }
 
-void bossMove() ///has issues
+void bossMove()
 {
     if (boss_pos_x>1100)
     {
@@ -447,7 +458,7 @@ int main()
     iSetTimer(intervalForEnemyMove, enemyMove);
     iSetTimer(intervalForEnemyBeam, enemyBeamCreate);
     iSetTimer(intervalForEnemyBeamMove, enemyBeamMove);
-    //iSetTimer(50, bossMove);
+    iSetTimer(50, bossMove);
 
     iInitialize(1300, 680, "Game Window!");
 
