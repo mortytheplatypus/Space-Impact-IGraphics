@@ -9,10 +9,9 @@ To do list:
 */
 
 #include "iGraphics.h"
-#include <math.h>
-#include <windows.h>
 
-#define MAX_ENEMY 5
+#define MAX_BOSS_BEAM 100
+#define MAX_ENEMY 1
 #define MAX_ENEMY_BEAM 10
 #define MAX_POWER 100
 #define MAX_BEAM 250
@@ -54,9 +53,11 @@ int enemyBeamNumber;
 typedef struct
 {
     int x, y, alive = 0;
-    int life = 11;
+    int life = 3;
 } BOSS;
 BOSS boss;
+BEAM bossBeamArray[100];
+int bossBeamNumber;
 
 
 void DrawMyBeam(float m, float n)
@@ -73,6 +74,7 @@ void DrawEnemyBeam(float m, float n)
 
 void DrawLifeBar(float n)
 {
+    iSetColor(255, 255, 255);
     iText(200, 650, "Lifebar: ", GLUT_BITMAP_HELVETICA_18);
     float temp = n/MAX_POWER;
     iSetColor(255, 255, 255);
@@ -98,9 +100,18 @@ void Menubar()
     iText(300,620, beamString, GLUT_BITMAP_HELVETICA_18);
 }
 
+void DrawBossBeam(float m, float n)
+{
+    float x = m+10, y1 = n-8, y2 = n+4;
+    double a[] = {m, x, x};
+    double b[] = {n, y1, y2};
+    iSetColor(240, 138, 0);
+    iFilledPolygon(a, b, 3);
+}
+
 void iDraw()
 {
-    if (gameMode==-1)
+    if (gameMode==-1) ///shows menu
     {
         iClear();
         iShowBMP(0, 0, "initialbackground.bmp");
@@ -113,7 +124,7 @@ void iDraw()
         iShowBMP2(530, 30, "exit.bmp", 0);
     }
 
-    if (gameMode==1)
+    if (gameMode==1) ///shows game window
     {
         iClear();
         iShowBMP(0, 0, "background.bmp");
@@ -208,7 +219,7 @@ void iDraw()
         {
             if (boss.alive == 1)
             {
-                iShowBMP2(boss.x, boss.y, "monster_lvl1.bmp", 0);
+                iShowBMP2(boss.x, boss.y, "monster.bmp", 0); ///###right till now in this section
 
                 for (j=0; j<beamIndex; j++) ///for shooting my beam
                 {
@@ -216,7 +227,32 @@ void iDraw()
                     {
                         DrawMyBeam(beamarray[j].x, beamarray[j].y);
 
-                        //if (beamarray[j].x>=enemyArray[k].x && beamarray[j].x<=enemyArray[k].x+50 && beamarray[j].y>=enemyArray[k].y && beamarray[j].y<=enemyArray[k].y+50)
+                        if (beamarray[j].x>boss.x && beamarray[j].x<boss.x+100 && beamarray[j].y>boss.y && beamarray[j].x<boss.y+101)
+                        { ///boss ke guli lage na
+                            score += 10;
+                            beamarray[j].is_shoot = 0;
+                            boss.life = boss.life-1;
+                            if (boss.life==0)
+                            {
+                                iText(500, 500,"JITSIII", GLUT_BITMAP_TIMES_ROMAN_24);
+                                //gameMode = 12;
+                            }
+                        }
+                    }
+                }
+
+                for (j=0; j<MAX_BOSS_BEAM; j++)
+                {
+                    if (bossBeamArray[j].is_shoot==1)
+                    {
+                        DrawBossBeam(bossBeamArray[j].x, bossBeamArray[j].y);
+
+                        if (bossBeamArray[j].x>spaceship_pos_x && bossBeamArray[j].x<spaceship_pos_x+50 && bossBeamArray[j].y>spaceship_pos_y && bossBeamArray[j].y<spaceship_pos_y+50)
+                        {
+                            bossBeamArray[j].is_shoot = 0;
+                            power -= 15;
+                            break;
+                        }
                     }
                 }
             }
@@ -232,35 +268,35 @@ void iDraw()
         }
     }
 
-    if (gameMode==2) ///sakib
+    if (gameMode==2) ///sakib - shows the background story
     {
         iClear();
         iShowBMP(0, 0, "story.bmp");
         iShowBMP2(510, 30, "backtomenu.bmp", 0);
     }
 
-    if (gameMode==3) ///sakib
+    if (gameMode==3) ///sakib - shows instructions
     {
         iClear();
         iShowBMP(0, 0, "instruction.bmp");
         iShowBMP2(510, 30, "backtomenu.bmp", 0);
     }
 
-    if (gameMode==4) ///sakib
+    if (gameMode==4) ///sakib - shows high score
     {
         iClear();
         iText(100, 100, "High Score", GLUT_BITMAP_TIMES_ROMAN_24);
         iShowBMP2(510, 30, "backtomenu.bmp", 0);
     }
 
-    if (gameMode==5) ///sakib
+    if (gameMode==5) ///sakib - shows credits
     {
         iClear();
         iText(100, 100, "Credits", GLUT_BITMAP_TIMES_ROMAN_24);
         iShowBMP2(510, 30, "backtomenu.bmp", 0);
     }
 
-    if (gameMode==11)
+    if (gameMode==11) ///sakib - if player don't win the game, just for showing the score and check whether he/she achieved high score
     {
         char highScoreArray[6];
         iClear();
@@ -271,6 +307,11 @@ void iDraw()
         iSetColor(0, 0, 0);
         itoa(highScore, highScoreArray, 10);
         iText(625, 235, scoreString, GLUT_BITMAP_TIMES_ROMAN_24);
+    }
+
+    if (gameMode==12) ///sakib - if player wins the game, updates high score also
+    {
+
     }
 }
 
@@ -425,8 +466,6 @@ void newEnemyCreate() ///to create new enemy; also creates lifePotion and beamPo
         if (enemyNumber>=MAX_ENEMY)
         {
             boss.alive = 1;
-            ///boss.x = 1300;
-            ///boss.y = 350;
         }
     }
 }
@@ -507,6 +546,35 @@ void bossMove()
     }
 }
 
+void bossBeamCreate()
+{
+    if (gameMode==1)
+    {
+        if (boss.alive==1)
+        {
+            bossBeamArray[bossBeamNumber].x = boss.x+4;
+            bossBeamArray[bossBeamNumber].y = boss.y+51;
+            bossBeamArray[bossBeamNumber].is_shoot = 1;
+            bossBeamNumber++;
+            bossBeamNumber %= MAX_BOSS_BEAM;
+        }
+    }
+}
+
+void bossBeamMove()
+{
+    if (gameMode==1)
+    {
+        if (boss.alive==1)
+        {
+            for (j=0; j<bossBeamNumber; j++)
+            {
+                if (bossBeamArray[j].is_shoot==1) bossBeamArray[j].x -= 5;
+            }
+        }
+    }
+}
+
 int main()
 {
     boss.x = 1300;
@@ -517,6 +585,8 @@ int main()
     iSetTimer(intervalForEnemyBeam, enemyBeamCreate);
     iSetTimer(intervalForEnemyBeamMove, enemyBeamMove);
     iSetTimer(50, bossMove);
+    iSetTimer(2000, bossBeamCreate);
+    iSetTimer(5, bossBeamMove);
 
     iInitialize(1300, 680, "Game Window!");
 
