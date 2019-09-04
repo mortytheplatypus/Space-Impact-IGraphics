@@ -4,13 +4,13 @@ To do list:
 2. Create "Pause", "Back to Menu", "Exit" menu in game window
 3. Work on saving high score
 4. complete boss-shooting, boss-getting-shot
+**5. Game continues on background even if gameMode!=1 ///seems solved
+**6. Bullet does not decrease after few potion
 */
 
 #include "iGraphics.h"
 #include <math.h>
 #include <windows.h>
-#include <iostream>
-using namespace std;
 
 #define MAX_ENEMY 5
 #define MAX_ENEMY_BEAM 10
@@ -51,6 +51,13 @@ typedef struct
 ENEMYBEAM enemyBeamArray[MAX_ENEMY][MAX_ENEMY_BEAM];
 int enemyBeamNumber;
 
+typedef struct
+{
+    int x, y, alive = 0;
+    int life = 11;
+} BOSS;
+BOSS boss;
+
 
 void DrawMyBeam(float m, float n)
 {
@@ -76,6 +83,8 @@ void DrawLifeBar(float n)
 
 void Menubar()
 {
+    iShowBMP2(1101, 645, "gameBacktomenu.bmp", 0); ///###############################################################
+    iShowBMP2(1234, 615, "gameExit.bmp", 0);
     itoa(score, scoreString, 10);
     iText(10,620,"Score : ", GLUT_BITMAP_HELVETICA_18);
     iText(80,620, scoreString, GLUT_BITMAP_HELVETICA_18);
@@ -195,22 +204,25 @@ void iDraw()
             }
         }
 
-        if (enemyNumber>=MAX_ENEMY) ///has issues, crushes window
+        if (enemyNumber>=MAX_ENEMY)
         {
-            iShowBMP2(boss_pos_x, boss_pos_y, "monster_lvl1.bmp", 0);
-
-            for (j=0; j<beamIndex; j++) ///for shooting my beam
+            if (boss.alive == 1)
             {
-                if (beamarray[j].is_shoot==1 && beamarray[j].x<=1300)
-                {
-                    DrawMyBeam(beamarray[j].x, beamarray[j].y);
+                iShowBMP2(boss.x, boss.y, "monster_lvl1.bmp", 0);
 
-                    //if (beamarray[j].x>=enemyArray[k].x && beamarray[j].x<=enemyArray[k].x+50 && beamarray[j].y>=enemyArray[k].y && beamarray[j].y<=enemyArray[k].y+50)
+                for (j=0; j<beamIndex; j++) ///for shooting my beam
+                {
+                    if (beamarray[j].is_shoot==1 && beamarray[j].x<=1300)
+                    {
+                        DrawMyBeam(beamarray[j].x, beamarray[j].y);
+
+                        //if (beamarray[j].x>=enemyArray[k].x && beamarray[j].x<=enemyArray[k].x+50 && beamarray[j].y>=enemyArray[k].y && beamarray[j].y<=enemyArray[k].y+50)
+                    }
                 }
             }
         }
 
-        if (power<=0 || beamIndex==max_beam_count) ///has issues, bullets gets negative
+        if (power<=0 || beamIndex==max_beam_count)
         {
             gameMode = 11;
             if (highScore < score)
@@ -285,6 +297,16 @@ void iMouse(int button, int state, int mx, int my)
             }
         }
 
+        if (gameMode==1)
+        {
+            if (mx>=1101 && mx<=1300 && my>=645 && my<=670) gameMode = -1; ///############### better with another gamemode with only exit and resume button
+
+            if (mx>=1234 && mx<=1295 && my>=615 && my<=650)
+            {
+                exit(0);
+            }
+        }
+
         if (gameMode==2)
         {
             if (mx>=510 && mx<=750 && my>=30 && my<=59) gameMode = -1;
@@ -314,103 +336,128 @@ void iMouse(int button, int state, int mx, int my)
 
 void iKeyboard(unsigned char key) ///to fire my beam
 {
-    if (key=='w')
+    if (gameMode==1)
     {
-        beamarray[beamIndex].x = spaceship_pos_x+50;
-        beamarray[beamIndex].y = spaceship_pos_y+22.5;
-        beamarray[beamIndex].is_shoot = 1;
-        beamIndex++;
+        if (key=='w' || key=='W')
+        {
+            beamarray[beamIndex].x = spaceship_pos_x+50;
+            beamarray[beamIndex].y = spaceship_pos_y+22.5;
+            beamarray[beamIndex].is_shoot = 1;
+            beamIndex++;
+        }
     }
 }
 
 void iSpecialKeyboard(unsigned char key) ///to move my spaceship
 {
-    if (key == GLUT_KEY_RIGHT)
+    if (gameMode==1)
     {
-        if (spaceship_pos_x+10<1250) spaceship_pos_x+=10;
-    }
-    if (key == GLUT_KEY_LEFT)
-    {
-        if (spaceship_pos_x-10>0) spaceship_pos_x-=10;
-    }
-    if (key == GLUT_KEY_UP)
-    {
-        if (spaceship_pos_y+10<550) spaceship_pos_y+=10;
-    }
-    if (key == GLUT_KEY_DOWN)
-    {
-        if (spaceship_pos_y-10>0) spaceship_pos_y-=10;
+        if (key == GLUT_KEY_RIGHT)
+        {
+            if (spaceship_pos_x+10<1250) spaceship_pos_x+=10;
+        }
+        if (key == GLUT_KEY_LEFT)
+        {
+            if (spaceship_pos_x-10>0) spaceship_pos_x-=10;
+        }
+        if (key == GLUT_KEY_UP)
+        {
+            if (spaceship_pos_y+10<550) spaceship_pos_y+=10;
+        }
+        if (key == GLUT_KEY_DOWN)
+        {
+            if (spaceship_pos_y-10>0) spaceship_pos_y-=10;
+        }
     }
 }
 
 void myBeamMove() ///to move my beam
 {
-    for (j=0; j<max_beam_count; j++)
+    if (gameMode==1)
     {
-        beamarray[j].x += 20;
-        if (beamarray[j].x > 1310)
+        for (j=0; j<max_beam_count; j++)
         {
-            beamarray[j].is_shoot = 0;
+            beamarray[j].x += 20;
+            if (beamarray[j].x > 1310)
+            {
+                beamarray[j].is_shoot = 0;
+            }
         }
     }
 }
 
 void newEnemyCreate() ///to create new enemy; also creates lifePotion and beamPotion
 {
-    if (enemyNumber%4==0 && enemyNumber%10!=0)
+    if (gameMode==1)
     {
-        lifePotion.alive = 0;
-    }
+        if (enemyNumber%4==0 && enemyNumber%10!=0)
+        {
+            lifePotion.alive = 0;
+        }
 
-    if (enemyNumber%10==0 && enemyNumber!=0)
-    {
-        lifePotion.alive = 1;
-        lifePotion.x = 500 + rand()%700;
-        lifePotion.y = rand()%500;
-    }
+        if (enemyNumber%10==0 && enemyNumber!=0)
+        {
+            lifePotion.alive = 1;
+            lifePotion.x = 500 + rand()%700;
+            lifePotion.y = rand()%500;
+        }
 
-    if (enemyNumber%13==0 && enemyNumber!=0)
-    {
-        bulletPotion.alive = 1;
-        bulletPotion.x = 600 + rand()%600;
-        bulletPotion.y = 200 + rand()%300;
-    }
+        if (enemyNumber%13==0 && enemyNumber!=0)
+        {
+            bulletPotion.alive = 1;
+            bulletPotion.x = 600 + rand()%600;
+            bulletPotion.y = 200 + rand()%300;
+        }
 
-    if (enemyNumber%35==0)
-    {
-        bulletPotion.alive = 0;
-    }
+        if (enemyNumber%35==0)
+        {
+            bulletPotion.alive = 0;
+        }
 
-    if (enemyNumber<MAX_ENEMY)
-    {
-        enemyArray[enemyNumber].x = 1300;
-        enemyArray[enemyNumber].y = (rand()%520);
-        enemyArray[enemyNumber].alive = 1;
-        enemyNumber++;
+        if (enemyNumber<MAX_ENEMY)
+        {
+            enemyArray[enemyNumber].x = 1300;
+            enemyArray[enemyNumber].y = (rand()%520);
+            enemyArray[enemyNumber].alive = 1;
+            enemyNumber++;
+        }
+
+        if (enemyNumber>=MAX_ENEMY)
+        {
+            boss.alive = 1;
+            ///boss.x = 1300;
+            ///boss.y = 350;
+        }
     }
 }
 
 void enemyMove() ///to move the enemy; ok
 {
-    for (j=0; j<enemyNumber; j++)
+    if (gameMode==1)
     {
-        enemyArray[j].x -= 4;
+        for (j=0; j<enemyNumber; j++)
+        {
+            enemyArray[j].x -= 4;
+        }
     }
 }
 
 void enemyBeamCreate() ///to create beams for each individual enemy; ok, i guess
 {
-    if (enemyNumber<MAX_ENEMY)
+    if (gameMode==1)
     {
-        for (j=0; j<enemyNumber; j++)
+        if (enemyNumber<MAX_ENEMY)
         {
-            if (enemyArray[j].alive!=0)
+            for (j=0; j<enemyNumber; j++)
             {
-                for (i=0; i<MAX_ENEMY_BEAM; i++)
+                if (enemyArray[j].alive!=0)
                 {
-                    enemyBeamArray[j][i].x = enemyArray[j].x-15;
-                    enemyBeamArray[j][i].y = enemyArray[j].y+22;
-                    enemyBeamArray[j][i].is_shoot = 1;
+                    for (i=0; i<MAX_ENEMY_BEAM; i++)
+                    {
+                        enemyBeamArray[j][i].x = enemyArray[j].x-15;
+                        enemyBeamArray[j][i].y = enemyArray[j].y+22;
+                        enemyBeamArray[j][i].is_shoot = 1;
+                    }
                 }
             }
         }
@@ -419,15 +466,18 @@ void enemyBeamCreate() ///to create beams for each individual enemy; ok, i guess
 
 void enemyBeamMove() ///to move beams of each individual enemy
 {
-    if (enemyNumber<MAX_ENEMY)
+    if (gameMode==1)
     {
-        for (j=0; j<enemyNumber; j++)
+        if (enemyNumber<MAX_ENEMY)
         {
-            if (enemyArray[j].alive!=0)
+            for (j=0; j<enemyNumber; j++)
             {
-                for (i=0; i<MAX_ENEMY_BEAM; i++)
+                if (enemyArray[j].alive!=0)
                 {
-                    enemyBeamArray[j][i].x -= 25;
+                    for (i=0; i<MAX_ENEMY_BEAM; i++)
+                    {
+                        enemyBeamArray[j][i].x -= 25;
+                    }
                 }
             }
         }
@@ -436,23 +486,31 @@ void enemyBeamMove() ///to move beams of each individual enemy
 
 void bossMove()
 {
-    if (boss_pos_x>1100)
+    if (gameMode==1)
     {
-        boss_pos_x -= 2;
-    }
-
-    if (boss_pos_x<=1100)
-    {
-        boss_pos_y += dy;
-        if (boss_pos_y<=0 || boss_pos_y>=600)
+        if (boss.alive == 1)
         {
-            dy = -dy;
+            if (boss.x>1000)
+            {
+                boss.x -= 2;
+            }
+
+            if (boss.x<=1000)
+            {
+                boss.y += dy;
+                if (boss.y<=0 || boss.y>=500)
+                {
+                    dy = -dy;
+                }
+            }
         }
     }
 }
 
 int main()
 {
+    boss.x = 1300;
+    boss.y = 300;
     iSetTimer(2, myBeamMove);
     iSetTimer(intervalForNewEnemy, newEnemyCreate);
     iSetTimer(intervalForEnemyMove, enemyMove);
