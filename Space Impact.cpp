@@ -11,12 +11,12 @@ To do list:
 #include "iGraphics.h"
 
 #define MAX_BOSS_BEAM 100
-#define MAX_ENEMY 1 ///eita change korte jeno bhule na jai
+#define MAX_ENEMY 20 ///eita change korte jeno bhule na jai
 #define MAX_ENEMY_BEAM 10
 #define MAX_POWER 100
 #define MAX_BEAM 250
 
-int i, j, k, power=MAX_POWER, score=0, highScore = 0, max_beam_count = MAX_BEAM;
+int i, j, k, power=MAX_POWER, score=0, highScore, max_beam_count = MAX_BEAM;
 float intervalForNewEnemy=3000,intervalForEnemyMove=50, intervalForEnemyBeam=2000, intervalForEnemyBeamMove=30;
 float spaceship_pos_x=100, spaceship_pos_y=300;
 float boss_pos_x=1000, boss_pos_y=400, dy=2;
@@ -53,7 +53,7 @@ int enemyBeamNumber;
 typedef struct
 {
     int x, y, alive = 0;
-    int life = 3; ///eita change korte jeno bhule na jai
+    int life = 10; ///eita change korte jeno bhule na jai
 } BOSS;
 BOSS boss;
 BEAM bossBeamArray[100];
@@ -134,47 +134,59 @@ void iDraw()
 
         iShowBMP2(spaceship_pos_x, spaceship_pos_y, "ship.bmp", 0);
 
-        if (lifePotion.alive==1)
-        {
-            iShowBMP2(lifePotion.x, lifePotion.y, "red-potion.bmp", 0);
-            for (j=0; j<beamIndex; j++)
-            {
-                if (beamarray[j].is_shoot==1)
-                {
-                    if (beamarray[j].x>=lifePotion.x && beamarray[j].x<=lifePotion.x+32 && beamarray[j].y>=lifePotion.y && beamarray[j].y<=lifePotion.y+32 && lifePotion.alive==1)
-                    {
-                        beamarray[j].is_shoot = 0;
-                        lifePotion.alive = 0;
-                        lifePotion.y = 680;
-                        power += 10;
-                        power = min(MAX_POWER, power);
-                        break;
-                    }
-                }
-            }
-        }
-
-        if (bulletPotion.alive==1)
-        {
-            iShowBMP2(bulletPotion.x, bulletPotion.y, "bomb.bmp", 0);
-            for (j=0; j<beamIndex; j++)
-            {
-                if (beamarray[j].is_shoot==1)
-                {
-                    if (beamarray[j].x>=bulletPotion.x && beamarray[j].x<=bulletPotion.x+75 && beamarray[j].y>=bulletPotion.y && beamarray[j].y<=bulletPotion.y+44 && bulletPotion.alive==1)
-                    {
-                        beamarray[j].is_shoot = 0;
-                        bulletPotion.alive = 0;
-                        bulletPotion.y = 680;
-                        max_beam_count += 25;
-                        break;
-                    }
-                }
-            }
-        }
-
         if (enemyNumber<MAX_ENEMY)
         {
+            if (lifePotion.alive==1)
+            {
+                iShowBMP2(lifePotion.x, lifePotion.y, "red-potion.bmp", 0);
+                if (spaceship_pos_x>lifePotion.x-50 && spaceship_pos_x<lifePotion.x+32 && spaceship_pos_y>lifePotion.y-50 && spaceship_pos_y<lifePotion.y+32)
+                {
+                    lifePotion.alive = 0;
+                    lifePotion.y = 680;
+                    power += 10;
+                    power = min(MAX_POWER, power);
+                }
+                /*for (j=0; j<beamIndex; j++)
+                {
+                    if (beamarray[j].is_shoot==1)
+                    {
+                        if (beamarray[j].x>=lifePotion.x && beamarray[j].x<=lifePotion.x+32 && beamarray[j].y>=lifePotion.y && beamarray[j].y<=lifePotion.y+32 && lifePotion.alive==1)
+                        {
+                            beamarray[j].is_shoot = 0;
+                            lifePotion.alive = 0;
+                            lifePotion.y = 680;
+                            power += 10;
+                            power = min(MAX_POWER, power);
+                            break;
+                        }
+                    }
+                }*/
+            }
+
+            if (bulletPotion.alive==1)
+            {
+                iShowBMP2(bulletPotion.x, bulletPotion.y, "bomb.bmp", 0);
+                if (spaceship_pos_x>bulletPotion.x-50 && spaceship_pos_x<bulletPotion.x+75 && spaceship_pos_y>bulletPotion.y-50 && spaceship_pos_y<bulletPotion.y+44)
+                {
+                    bulletPotion.alive = 0;
+                    bulletPotion.y = 680;
+                    max_beam_count += 15;
+                }
+                /*for (j=0; j<beamIndex; j++)
+                {
+                    if (beamarray[j].is_shoot==1)
+                    {
+                        if (beamarray[j].x>=bulletPotion.x && beamarray[j].x<=bulletPotion.x+75 && beamarray[j].y>=bulletPotion.y && beamarray[j].y<=bulletPotion.y+44 && bulletPotion.alive==1)
+                        {
+                            beamarray[j].is_shoot = 0;
+                            bulletPotion.alive = 0;
+                            bulletPotion.y = 680;
+                            max_beam_count += 25;
+                            break;
+                        }
+                    }
+                }*/
+            }
             for (j=0; j<beamIndex; j++) ///for shooting my beam
             {
                 if (beamarray[j].is_shoot==1 && beamarray[j].x<=1300)
@@ -194,11 +206,19 @@ void iDraw()
                     }
                 }
             }
+
             for (j=0; j<enemyNumber; j++)
             {
                 if (enemyArray[j].alive!=0) ///to make sure it has not been hit
                 {
                     iShowBMP2(enemyArray[j].x, enemyArray[j].y, "enemy_ship.bmp", 0);
+                    if (spaceship_pos_x>enemyArray[j].x-50 && spaceship_pos_x<enemyArray[j].x+50 && spaceship_pos_y>enemyArray[j].y-50 && spaceship_pos_y<enemyArray[j].y+50)
+                    {
+                        enemyArray[j].alive = 0;
+                        power-=10;
+                        score+=10;
+                        continue;
+                    }
                     for (i=0; i<MAX_ENEMY_BEAM; i++)
                     {
                         if (enemyBeamArray[j][i].is_shoot==1)
@@ -260,10 +280,6 @@ void iDraw()
         if (power<=0 || beamIndex==max_beam_count)
         {
             gameMode = 11;
-            if (highScore < score)
-            {
-                highScore = score;
-            }
         }
     }
 
@@ -297,14 +313,29 @@ void iDraw()
 
     if (gameMode==11) ///sakib - if player don't win the game, just for showing the score and check whether he/she achieved high score
     {
-        char highScoreArray[6];
+        /*FILE *fp;
+        char *name = "high score.txt";
+        char highScoreString[6];
+        fp = fopen(name, "r");
+        int n;
+
+        fscanf(fp, "%d", n);
+        if (score>n)
+        {
+            fprintf(fp, "%d", score);
+            n = score;
+        }
+        iSetColor(0, 0, 0);
+        itoa(n, highScoreString, 10);
+        iText(300, 500, highScoreString, GLUT_BITMAP_HELVETICA_18);*/
+
         iClear();
         iShowBMP(0, 0, "BackgoundImages//pinkfloydback.bmp");
         iSetColor(255, 255, 255);
         iText(600, 300, "Your Score: ", GLUT_BITMAP_HELVETICA_18);
         iFilledRectangle(500, 220, 300, 50);
         iSetColor(0, 0, 0);
-        itoa(highScore, highScoreArray, 10);
+        itoa(score, scoreString, 10);
         iText(625, 235, scoreString, GLUT_BITMAP_TIMES_ROMAN_24);
     }
 
@@ -326,7 +357,16 @@ void iMouse(int button, int state, int mx, int my)
     {
         if (gameMode==-1)
         {
-            if (mx>=490 && mx<=730 && my>=400 && my<=430) gameMode = 1;
+            if (mx>=490 && mx<=730 && my>=400 && my<=430)
+            {
+                power=MAX_POWER;
+                score=0;
+                max_beam_count = MAX_BEAM;
+                beamIndex = 0;
+                enemyNumber = 0;
+                gameMode = 1;
+            }
+
             if (mx>=535 && mx<=680 && my>=350 && my<=380) gameMode = 2;
             if (mx>=450 && mx<=773 && my>=300 && my<=330) gameMode = 3;
             if (mx>=470 && mx<=750 && my>=250 && my<=280) gameMode = 4;
@@ -431,32 +471,26 @@ void newEnemyCreate() ///to create new enemy; also creates lifePotion and beamPo
 {
     if (gameMode==1)
     {
-        if (enemyNumber%4==0 && enemyNumber%10!=0)
-        {
-            lifePotion.alive = 0;
-        }
-
-        if (enemyNumber%10==0 && enemyNumber!=0)
-        {
-            lifePotion.alive = 1;
-            lifePotion.x = 500 + rand()%700;
-            lifePotion.y = rand()%500;
-        }
-
-        if (enemyNumber%13==0 && enemyNumber!=0)
-        {
-            bulletPotion.alive = 1;
-            bulletPotion.x = 600 + rand()%600;
-            bulletPotion.y = 200 + rand()%300;
-        }
-
-        if (enemyNumber%35==0)
-        {
-            bulletPotion.alive = 0;
-        }
-
         if (enemyNumber<MAX_ENEMY)
         {
+            if (enemyNumber%5==0 && enemyNumber%10!=0) lifePotion.alive = 0;
+
+            if (enemyNumber%10==0 && enemyNumber!=0)
+            {
+                lifePotion.alive = 1;
+                lifePotion.x = 500 + rand()%700;
+                lifePotion.y = rand()%500;
+            }
+
+            if (enemyNumber%13==0 && enemyNumber!=0)
+            {
+                bulletPotion.alive = 1;
+                bulletPotion.x = 600 + rand()%600;
+                bulletPotion.y = 200 + rand()%300;
+            }
+
+            if (enemyNumber%18==0) bulletPotion.alive = 0;
+
             enemyArray[enemyNumber].x = 1300;
             enemyArray[enemyNumber].y = (rand()%520);
             enemyArray[enemyNumber].alive = 1;
