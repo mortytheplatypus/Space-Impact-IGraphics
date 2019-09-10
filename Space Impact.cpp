@@ -90,6 +90,8 @@ void Menubar()
 {
     iShowBMP2(1211, 645, "pause.bmp", 0);
     iShowBMP2(1234, 615, "gameExit.bmp", 0);
+    iShowBMP2(500, 610, "MenuImages//menutitle.bmp", 0);
+
     itoa(score, scoreString, 10);
     iText(10,620,"Score : ", GLUT_BITMAP_HELVETICA_18);
     iText(80,620, scoreString, GLUT_BITMAP_HELVETICA_18);
@@ -166,6 +168,7 @@ void iDraw()
                 if (beamarray[j].is_shoot==1)
                 {
                     DrawMyBeam(beamarray[j].x, beamarray[j].y);
+                    //iShowBMP2(beamarray[j].x, beamarray[j].y, "beam.bmp", 0);
                     for (k=0; k<enemyNumber; k++) ///checks whether the bullet hits the enemy, if so, both of them go extinct
                     {
                         if (enemyArray[k].alive==1)
@@ -300,7 +303,6 @@ void iDraw()
     if (gameMode==11) ///sakib - if player don't win the game, just for showing the score and check whether he/she achieved high score
     {
         iClear();
-        ///############################ baki ache #############
         FILE *fp, *fp1;
 
         fp = fopen("highscore.txt", "r");
@@ -334,6 +336,34 @@ void iDraw()
     {
         iClear();
         iShowBMP(0, 0, "BackgoundImages//congratulation.bmp");
+
+        FILE *fp, *fp1;
+
+        fp = fopen("highscore.txt", "r");
+        int n;
+        fscanf(fp, "%d", &n);
+
+        if (score>n)
+        {
+            fp1 = fopen("highscore.txt", "w");
+            fprintf(fp1, "%d", score);
+            fclose(fp1);
+        }
+        fclose(fp);
+
+        fp = fopen("highscore.txt", "r");
+        fscanf(fp, "%d", &n);
+
+        iSetColor(255, 255, 255);
+        itoa(score, scoreString, 10);
+        itoa(n, highScoreString, 10);
+
+        iText(600, 200, scoreString, GLUT_BITMAP_TIMES_ROMAN_24);
+        iText(400, 200, "Score: ", GLUT_BITMAP_TIMES_ROMAN_24);
+        iText(600, 500, highScoreString, GLUT_BITMAP_TIMES_ROMAN_24);
+        iText(400, 500, "High Score: ", GLUT_BITMAP_TIMES_ROMAN_24);
+        iShowBMP2(510, 30, "backtomenu.bmp", 0);
+        fclose(fp);
     }
 }
 
@@ -419,6 +449,11 @@ void iMouse(int button, int state, int mx, int my)
         }
 
         if (gameMode==11)
+        {
+            if (mx>=510 && mx<=750 && my>=30 && my<=59) gameMode = -1;
+        }
+
+        if (gameMode==12)
         {
             if (mx>=510 && mx<=750 && my>=30 && my<=59) gameMode = -1;
         }
