@@ -294,8 +294,8 @@ void iDraw()
         fscanf(hs1, "%s", name);
         fscanf(hs2, "%s", score);
 
-        iText(500, 500, name, GLUT_BITMAP_TIMES_ROMAN_24);
-        iText(500, 470, score, GLUT_BITMAP_TIMES_ROMAN_24);
+        iText(617, 370, name, GLUT_BITMAP_TIMES_ROMAN_24);
+        iText(625, 330, score, GLUT_BITMAP_TIMES_ROMAN_24);
 
         fclose(hs1);
         fclose(hs2);
@@ -442,6 +442,7 @@ void iMouse(int button, int state, int mx, int my)
         if (gameMode==4)
         {
             if (mx>=510 && mx<=750 && my>=30 && my<=59) gameMode = -1;
+            printf("%d %d\n", mx, my);
         }
 
         if (gameMode==5)
