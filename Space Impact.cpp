@@ -14,7 +14,7 @@ To do list:
 #include "iGraphics.h"
 
 #define MAX_BOSS_BEAM 100
-#define MAX_ENEMY 13 ///eita change korte jeno bhule na jai
+#define MAX_ENEMY 3 ///eita change korte jeno bhule na jai
 #define MAX_ENEMY_BEAM 10
 #define MAX_POWER 100
 #define MAX_BEAM 15
@@ -56,7 +56,7 @@ int enemyBeamNumber;
 typedef struct
 {
     int x, y, alive = 0;
-    int life = 10; ///eita change korte jeno bhule na jai
+    int life = 1; ///eita change korte jeno bhule na jai
 } BOSS;
 BOSS boss;
 BEAM bossBeamArray[100];
@@ -116,7 +116,7 @@ void DrawBossBeam(float m, float n)
 
 void iDraw()
 {
-    if (gameMode==-1) ///shows menu
+    if (gameMode==-1) ///menu - DONE!!
     {
         iClear();
         iShowBMP(0, 0, "BackgroundImages//Home.bmp");
@@ -129,7 +129,7 @@ void iDraw()
         iShowBMP2(530, 30, "MenuImages//exit.bmp", 0);
     }
 
-    if (gameMode==1) ///shows game window
+    if (gameMode==1) ///game window - DONE!!
     {
         iClear();
         iShowBMP(0, 0, "BackgroundImages//background.bmp");
@@ -262,50 +262,67 @@ void iDraw()
         }
     }
 
-    if (gameMode==2) ///sakib - shows the background story
+    if (gameMode==2) ///background story - DONE!!
     {
         iClear();
         iShowBMP(0, 0, "BackgroundImages//story.bmp");
         iShowBMP2(510, 30, "backtomenu.bmp", 0);
     }
 
-    if (gameMode==3) ///sakib - shows instructions
+    if (gameMode==3) ///instructions - DONE!!
     {
         iClear();
         iShowBMP(0, 0, "BackgroundImages//instruction.bmp");
         iShowBMP2(510, 30, "backtomenu.bmp", 0);
+        iShowBMP2(193, 418, "red-potion.bmp", 0);
+        iShowBMP2(758, 418, "red-potion.bmp", 0);
+        iShowBMP2(185, 375, "bomb.bmp", 0);
+        iShowBMP2(770, 375, "bomb.bmp", 0);
     }
 
-    if (gameMode==4) ///sakib - shows high score
+    if (gameMode==4) ///sakib - shows high score ----------needs update
     {
         iClear();
-        iText(100, 100, "High Score", GLUT_BITMAP_TIMES_ROMAN_24);
+        iShowBMP(0, 0, "BackgroundImages//highscore1.bmp");
         iShowBMP2(510, 30, "backtomenu.bmp", 0);
+
+        FILE *hs1, *hs2;
+        hs1 = fopen("highscorename.txt", "r");
+        hs2 = fopen("highscore.txt", "r");
+
+        char name[20], score[10];
+        fscanf(hs1, "%s", name);
+        fscanf(hs2, "%s", score);
+
+        iText(500, 500, name, GLUT_BITMAP_TIMES_ROMAN_24);
+        iText(500, 470, score, GLUT_BITMAP_TIMES_ROMAN_24);
+
+        fclose(hs1);
+        fclose(hs2);
     }
 
-    if (gameMode==5) ///credits
+    if (gameMode==5) ///credits - DONE!!
     {
         iClear();
         iShowBMP(0, 0, "BackgroundImages//credits.bmp");
         iShowBMP2(510, 30, "backtomenu.bmp", 0);
     }
 
-    if (gameMode==6) ///Resume menu
+    if (gameMode==6) ///Resume menu - DONE!!
     {
         iClear();
         iShowBMP(0, 0, "BackgroundImages//Resume.bmp");
         iShowBMP2(200, 550, "MenuImages//title.bmp", 0);
-        iShowBMP2(575, 350, "resume.bmp", 0);
-        iShowBMP2(550, 290, "resume-newgame.bmp", 0);
-        iShowBMP2(595, 230, "quit.bmp", 0);
+        iShowBMP2(550, 350, "resume.bmp", 0);
+        iShowBMP2(525, 290, "resume-newgame.bmp", 0);
+        iShowBMP2(570, 230, "quit.bmp", 0);
         iShowBMP2(510, 30, "backtomenu.bmp", 0);
     }
 
-    if (gameMode==11) ///sakib - if player don't win the game, just for showing the score and check whether he/she achieved high score
+    if (gameMode==11) ///if player don't win the game, just shows the score
     {
         iClear();
         iShowBMP(0, 0, "BackgroundImages//losingscore.bmp");
-        //iShowBMP(400, 280, "capture.bmp");
         FILE *fp, *fp1;
 
         fp = fopen("highscore.txt", "r");
@@ -335,7 +352,7 @@ void iDraw()
         fclose(fp);
     }
 
-    if (gameMode==12) ///sakib - if player wins the game, updates high score also
+    if (gameMode==12) ///sakib - if player wins the game, updates high score also ----------needs update
     {
         iClear();
         iShowBMP(0, 0, "BackgroundImages//congratulation.bmp");
@@ -435,8 +452,8 @@ void iMouse(int button, int state, int mx, int my)
         if (gameMode==6)
         {
             if (mx>=510 && mx<=750 && my>=30 && my<=59) gameMode = -1;
-            if (mx>=575 && mx<=724 && my>=350 && my<=395) gameMode = 1;
-            if (mx>=550 && mx<=751 && my>=290 && my<=335)
+            if (mx>=550 && mx<=699 && my>=350 && my<=395) gameMode = 1;
+            if (mx>=525 && mx<=726 && my>=290 && my<=335)
             {
                 power=MAX_POWER;
                 score=0;
@@ -446,7 +463,7 @@ void iMouse(int button, int state, int mx, int my)
                 gameMode = 1;
             }
 
-            if (mx>=595 && mx<=690 && my>=230 && my<=285)
+            if (mx>=570 && mx<=665 && my>=230 && my<=285)
             {
                 exit(0);
             }
