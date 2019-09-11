@@ -17,7 +17,7 @@ To do list:
 #define MAX_ENEMY 13 ///eita change korte jeno bhule na jai
 #define MAX_ENEMY_BEAM 10
 #define MAX_POWER 100
-#define MAX_BEAM 150
+#define MAX_BEAM 15
 
 int i, j, k, power=MAX_POWER, score=0, highScore, max_beam_count = MAX_BEAM;
 float intervalForNewEnemy=3000,intervalForEnemyMove=50, intervalForEnemyBeam=2000, intervalForEnemyBeamMove=30;
@@ -119,7 +119,7 @@ void iDraw()
     if (gameMode==-1) ///shows menu
     {
         iClear();
-        iShowBMP(0, 0, "BackgoundImages//Home.bmp");
+        iShowBMP(0, 0, "BackgroundImages//Home.bmp");
         iShowBMP2(200, 550, "MenuImages//title.bmp", 0);
         iShowBMP2(490, 400, "MenuImages//1-newgame.bmp", 0);
         iShowBMP2(535, 350, "MenuImages//2-story.bmp", 0);
@@ -132,7 +132,7 @@ void iDraw()
     if (gameMode==1) ///shows game window
     {
         iClear();
-        iShowBMP(0, 0, "BackgoundImages//background.bmp");
+        iShowBMP(0, 0, "BackgroundImages//background.bmp");
         iShowBMP(0, 600, "MenuImages//Menubar.bmp");
         DrawLifeBar(power);
         Menubar();
@@ -265,14 +265,14 @@ void iDraw()
     if (gameMode==2) ///sakib - shows the background story
     {
         iClear();
-        iShowBMP(0, 0, "BackgoundImages//story.bmp");
+        iShowBMP(0, 0, "BackgroundImages//story.bmp");
         iShowBMP2(510, 30, "backtomenu.bmp", 0);
     }
 
     if (gameMode==3) ///sakib - shows instructions
     {
         iClear();
-        iShowBMP(0, 0, "BackgoundImages//instruction.bmp");
+        iShowBMP(0, 0, "BackgroundImages//instruction.bmp");
         iShowBMP2(510, 30, "backtomenu.bmp", 0);
     }
 
@@ -283,26 +283,29 @@ void iDraw()
         iShowBMP2(510, 30, "backtomenu.bmp", 0);
     }
 
-    if (gameMode==5) ///sakib - shows credits
+    if (gameMode==5) ///credits
     {
         iClear();
-        iText(100, 100, "Credits", GLUT_BITMAP_TIMES_ROMAN_24);
+        iShowBMP(0, 0, "BackgroundImages//credits.bmp");
         iShowBMP2(510, 30, "backtomenu.bmp", 0);
     }
 
-    if (gameMode==6)
+    if (gameMode==6) ///Resume menu
     {
         iClear();
-        iShowBMP(0, 0, "BackgoundImages//Resume.bmp");
+        iShowBMP(0, 0, "BackgroundImages//Resume.bmp");
         iShowBMP2(200, 550, "MenuImages//title.bmp", 0);
         iShowBMP2(575, 350, "resume.bmp", 0);
         iShowBMP2(550, 290, "resume-newgame.bmp", 0);
         iShowBMP2(595, 230, "quit.bmp", 0);
+        iShowBMP2(510, 30, "backtomenu.bmp", 0);
     }
 
     if (gameMode==11) ///sakib - if player don't win the game, just for showing the score and check whether he/she achieved high score
     {
         iClear();
+        iShowBMP(0, 0, "BackgroundImages//losingscore.bmp");
+        //iShowBMP(400, 280, "capture.bmp");
         FILE *fp, *fp1;
 
         fp = fopen("highscore.txt", "r");
@@ -320,14 +323,14 @@ void iDraw()
         fp = fopen("highscore.txt", "r");
         fscanf(fp, "%d", &n);
 
-        iSetColor(255, 255, 255);
+        iSetColor(215, 240, 247);
         itoa(score, scoreString, 10);
         itoa(n, highScoreString, 10);
 
-        iText(600, 200, scoreString, GLUT_BITMAP_TIMES_ROMAN_24);
-        iText(400, 200, "Score: ", GLUT_BITMAP_TIMES_ROMAN_24);
-        iText(600, 500, highScoreString, GLUT_BITMAP_TIMES_ROMAN_24);
-        iText(400, 500, "High Score: ", GLUT_BITMAP_TIMES_ROMAN_24);
+        iText(626, 237, scoreString, GLUT_BITMAP_TIMES_ROMAN_24);
+        //iText(550, 300, "Your Score: ", GLUT_BITMAP_TIMES_ROMAN_24);
+        iText(626, 310, highScoreString, GLUT_BITMAP_TIMES_ROMAN_24);
+        //iText(550, 340, "High Score: ", GLUT_BITMAP_TIMES_ROMAN_24);
         iShowBMP2(510, 30, "backtomenu.bmp", 0);
         fclose(fp);
     }
@@ -335,7 +338,7 @@ void iDraw()
     if (gameMode==12) ///sakib - if player wins the game, updates high score also
     {
         iClear();
-        iShowBMP(0, 0, "BackgoundImages//congratulation.bmp");
+        iShowBMP(0, 0, "BackgroundImages//congratulation.bmp");
 
         FILE *fp, *fp1;
 
@@ -431,6 +434,7 @@ void iMouse(int button, int state, int mx, int my)
 
         if (gameMode==6)
         {
+            if (mx>=510 && mx<=750 && my>=30 && my<=59) gameMode = -1;
             if (mx>=575 && mx<=724 && my>=350 && my<=395) gameMode = 1;
             if (mx>=550 && mx<=751 && my>=290 && my<=335)
             {
