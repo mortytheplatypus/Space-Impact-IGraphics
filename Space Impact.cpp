@@ -14,7 +14,7 @@ To do list:
 #include "iGraphics.h"
 
 #define MAX_BOSS_BEAM 100
-#define MAX_ENEMY 15 ///eita change korte jeno bhule na jai
+#define MAX_ENEMY 23 ///eita change korte jeno bhule na jai
 #define MAX_ENEMY_BEAM 10
 #define MAX_POWER 100
 #define MAX_BEAM 150
@@ -65,7 +65,7 @@ int enemyBeamNumber;
 typedef struct
 {
     int x, y, alive = 0;
-    int life = 1; ///eita change korte jeno bhule na jai
+    int life = 9; ///eita change korte jeno bhule na jai
 } BOSS;
 BOSS boss;
 BEAM bossBeamArray[100];
@@ -221,8 +221,8 @@ void iDraw()
             {
                 if (beamarray[j].is_shoot==1)
                 {
-                    DrawMyBeam(beamarray[j].x, beamarray[j].y);
-                    //iShowBMP2(beamarray[j].x, beamarray[j].y, "beam.bmp", 0);
+                    ///DrawMyBeam(beamarray[j].x, beamarray[j].y);
+                    iShowBMP2(beamarray[j].x, beamarray[j].y, "beam.bmp", 0);
                     for (k=0; k<enemyNumber; k++) ///checks whether the bullet hits the enemy, if so, both of them go extinct
                     {
                         if (enemyArray[k].alive==1)
@@ -256,7 +256,8 @@ void iDraw()
                     {
                         if (enemyBeamArray[j][i].is_shoot==1)
                         {
-                            DrawEnemyBeam(enemyBeamArray[j][i].x, enemyBeamArray[j][i].y);
+                            //DrawEnemyBeam(enemyBeamArray[j][i].x, enemyBeamArray[j][i].y);
+                            iShowBMP2(enemyBeamArray[j][i].x, enemyBeamArray[j][i].y, "enemy_beam.bmp", 0);
                             if (enemyBeamArray[j][i].x>spaceship_pos_x && enemyBeamArray[j][i].x<spaceship_pos_x+50 && enemyBeamArray[j][i].y>spaceship_pos_y && enemyBeamArray[j][i].y<spaceship_pos_y+50)
                             {
                                 power--;
@@ -271,13 +272,14 @@ void iDraw()
         {
             if (boss.alive == 1)
             {
-                iShowBMP2(boss.x, boss.y, "monster.bmp", 0); ///###right till now in this section
+                iShowBMP2(boss.x, boss.y, "monster.bmp", 0);
 
                 for (j=0; j<beamIndex; j++) ///for shooting my beam
                 {
                     if (beamarray[j].is_shoot==1)
                     {
-                        DrawMyBeam(beamarray[j].x, beamarray[j].y);
+                        //DrawMyBeam(beamarray[j].x, beamarray[j].y);
+                        iShowBMP2(beamarray[j].x, beamarray[j].y, "beam.bmp", 0);
 
                         if (beamarray[j].x>boss.x && beamarray[j].x<boss.x+100 && beamarray[j].y>boss.y && beamarray[j].y<boss.y+101)
                         {
@@ -337,7 +339,7 @@ void iDraw()
     if (gameMode==4) ///high score - DONE!
     {
         iClear();
-        iShowBMP(0, 0, "BackgroundImages//highscore1.bmp");
+        iShowBMP(0, 0, "BackgroundImages//highscore.bmp");
         iShowBMP2(200, 580, "MenuImages//title.bmp", 0);
         iShowBMP2(510, 30, "backtomenu.bmp", 0);
 
@@ -386,7 +388,7 @@ void iDraw()
     if (gameMode==11) ///if player don't win the game, just shows score, high score and takes name input - DONE!
     {
         iClear();
-        iShowBMP(0, 0, "BackgroundImages//losingscore1.bmp");
+        iShowBMP(0, 0, "BackgroundImages//losingscore.bmp");
         iShowBMP2(510, 30, "backtomenu.bmp", 0);
         char temp1[6], temp2[6], temp3[30];
         int nn;
@@ -409,14 +411,16 @@ void iDraw()
             iSetColor(50, 50, 50);
             iText(810, 275, str, GLUT_BITMAP_HELVETICA_18);
         }
-
-
     }
 
     if (gameMode==12) ///if player wins the game, updates high score also - DONE!
     {
         iClear();
-        iShowBMP(0, 0, "BackgroundImages//congratulation2.bmp");
+        iShowBMP(0, 0, "BackgroundImages//congratulation.bmp");
+        iSetColor(240, 240, 240);
+        char tem[6];
+        itoa(score, tem, 10);
+        iText(700, 168, tem, GLUT_BITMAP_TIMES_ROMAN_24);
         iSetColor(225, 225, 225);
         iFilledRectangle(660, 35, 230, 30);
         if (mode==1)
@@ -751,7 +755,7 @@ int main()
     iSetTimer(intervalForEnemyBeam, enemyBeamCreate);
     iSetTimer(intervalForEnemyBeamMove, enemyBeamMove);
     iSetTimer(50, bossMove);
-    iSetTimer(1500, bossBeamCreate);
+    iSetTimer(1000, bossBeamCreate);
     iSetTimer(5, bossBeamMove);
 
     iInitialize(1300, 680, "Game Window!");
