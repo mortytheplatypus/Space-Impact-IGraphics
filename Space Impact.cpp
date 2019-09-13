@@ -1,23 +1,23 @@
 /*
 To do list:
-1. Ask Sakib to complete his tasks
+1. Ask Sakib to complete his tasks ///seems solved
 2. Create "Pause", "Back to Menu", "Exit" menu in game window ///seems solved
-3. Work on saving high score
+3. Work on saving high score ///seems solved
 4. complete boss-shooting, boss-getting-shot ///seems solved
 **5. Game continues on background even if gameMode!=1 ///seems solved
 **6. Bullet does not decrease after few potion
 7. Create "Pause" menu and "Resume" window ///seems solved
-8. (optional) Are you sure window in exit
-9. khela jitle high score update kora
+8. (optional) Are you sure window in exit ///lagbe na
+9. khela jitle high score update kora ///seems solved
 */
 
 #include "iGraphics.h"
 
 #define MAX_BOSS_BEAM 100
-#define MAX_ENEMY 30 ///eita change korte jeno bhule na jai
+#define MAX_ENEMY 15 ///eita change korte jeno bhule na jai
 #define MAX_ENEMY_BEAM 10
 #define MAX_POWER 100
-#define MAX_BEAM 15
+#define MAX_BEAM 150
 
 int i, j, k, power=MAX_POWER, score=0, highScore, max_beam_count = MAX_BEAM;
 float intervalForNewEnemy=3000,intervalForEnemyMove=50, intervalForEnemyBeam=2000, intervalForEnemyBeamMove=30;
@@ -159,13 +159,6 @@ void highScoreUpdate(char str2[])
             }
         }
     }
-
-
-    /*printf("\n\nin function:\n\n");
-    for (i=0; i<5; i++)
-    {
-        printf("%s %d\n", scores[i].plr, scores[i].scr);
-    }*/
 
     p = fopen("highscore.txt", "w");
     for (i=0; i<5; i++)
@@ -356,6 +349,7 @@ void iDraw()
         }
         fclose(hs);
 
+        iSetColor(240, 240, 240);
         int xxx=500, yyy=450;
         for (i=0; i<5; i++)
         {
@@ -419,11 +413,17 @@ void iDraw()
 
     }
 
-    if (gameMode==12) ///if player wins the game, updates high score also ----------needs update
+    if (gameMode==12) ///if player wins the game, updates high score also - DONE!
     {
         iClear();
-        iShowBMP(0, 0, "BackgroundImages//congratulation.bmp");
-        iShowBMP2(510, 30, "backtomenu.bmp", 0);
+        iShowBMP(0, 0, "BackgroundImages//congratulation2.bmp");
+        iSetColor(225, 225, 225);
+        iFilledRectangle(660, 35, 230, 30);
+        if (mode==1)
+        {
+            iSetColor(50, 50, 50);
+            iText(665, 45, str, GLUT_BITMAP_HELVETICA_18);
+        }
 
     }
 }
@@ -513,14 +513,15 @@ void iMouse(int button, int state, int mx, int my)
 
         if (gameMode==11)
         {
-            printf("%d %d\n", mx, my);
+
             if (mx>=510 && mx<=750 && my>=30 && my<=59) gameMode = -1;
             if (mx>=810 && mx<=1080 && my>=265 && my<=315) mode = 1; //805, 265, 280, 40
         }
 
         if (gameMode==12)
         {
-            if (mx>=510 && mx<=750 && my>=30 && my<=59) gameMode = -1;
+            printf("%d %d\n", mx, my); //(660, 35, 230, 30)
+            if (mx>=665 && mx<=910 && my>=35 && my<=65) mode = 1;
         }
     }
     if(button == GLUT_RIGHT_BUTTON && state == GLUT_DOWN)
@@ -542,7 +543,7 @@ void iKeyboard(unsigned char key) ///to fire my beam
         }
     }
 
-    if (gameMode==11) ///#############################
+    if (gameMode==11 || gameMode==12) ///#############################
     {
         if (mode==1)
         {
@@ -550,7 +551,6 @@ void iKeyboard(unsigned char key) ///to fire my beam
             {
                 mode = 0;
                 strcpy(str2, str);
-                //printf("\n\n\t\t%s\n\n", str2);
                 highScoreUpdate(str2);
                 len = 0;
                 gameMode = -1;
