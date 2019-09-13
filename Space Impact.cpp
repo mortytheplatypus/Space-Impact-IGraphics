@@ -14,7 +14,7 @@ To do list:
 #include "iGraphics.h"
 
 #define MAX_BOSS_BEAM 100
-#define MAX_ENEMY 3 ///eita change korte jeno bhule na jai
+#define MAX_ENEMY 30 ///eita change korte jeno bhule na jai
 #define MAX_ENEMY_BEAM 10
 #define MAX_POWER 100
 #define MAX_BEAM 15
@@ -25,6 +25,15 @@ float spaceship_pos_x=100, spaceship_pos_y=300;
 float boss_pos_x=1000, boss_pos_y=400, dy=2;
 char scoreString[6], powerString[6], beamString[6], highScoreString[6];
 int gameMode = -1;
+
+char str[50], str2[50];
+int len, mode;
+
+typedef struct
+{
+    int scr;
+    char plr[20];
+} PLAYER;
 
 typedef struct
 {
@@ -112,6 +121,58 @@ void DrawBossBeam(float m, float n)
     double b[] = {n, y1, y2};
     iSetColor(240, 138, 0);
     iFilledPolygon(a, b, 3);
+}
+
+void highScoreUpdate(char str2[])
+{
+    PLAYER scores[5];
+    FILE *p;
+    p = fopen("highscore.txt", "r");
+    for (i=0; i<5; i++)
+    {
+        fscanf(p, "%s %d", &scores[i].plr, &scores[i].scr);
+    }
+    fclose(p);
+
+    if (scores[4].scr < score)
+    {
+        scores[4].scr = score;
+        strcpy(scores[4].plr, str2);
+    }
+
+    for (i=0; i<5; i++)
+    {
+        for (j=0; j<5; j++)
+        {
+            if (scores[i].scr>scores[j].scr)
+            {
+                int tmp;
+                char tmpar[30];
+
+                tmp = scores[i].scr;
+                scores[i].scr = scores[j].scr;
+                scores[j].scr = tmp;
+
+                strcpy(tmpar, scores[i].plr);
+                strcpy(scores[i].plr, scores[j].plr);
+                strcpy(scores[j].plr, tmpar);
+            }
+        }
+    }
+
+
+    printf("\n\nin function:\n\n");
+    for (i=0; i<5; i++)
+    {
+        printf("%s %d\n", scores[i].plr, scores[i].scr);
+    }
+
+    p = fopen("highscore.txt", "w");
+    for (i=0; i<5; i++)
+    {
+        fprintf(p, "%s %d\n", scores[i].plr, scores[i].scr);
+    }
+    fclose(p);
 }
 
 void iDraw()
@@ -280,25 +341,34 @@ void iDraw()
         iShowBMP2(770, 375, "bomb.bmp", 0);
     }
 
-    if (gameMode==4) ///sakib - shows high score ----------needs update
+    if (gameMode==4) ///high score - DONE!
     {
         iClear();
         iShowBMP(0, 0, "BackgroundImages//highscore1.bmp");
+        iShowBMP2(200, 580, "MenuImages//title.bmp", 0);
         iShowBMP2(510, 30, "backtomenu.bmp", 0);
 
-        FILE *hs1, *hs2;
-        hs1 = fopen("highscorename.txt", "r");
-        hs2 = fopen("highscore.txt", "r");
+        PLAYER scores[5];
+        FILE *hs = fopen("highscore.txt", "r");
+        for (i=0; i<5; i++)
+        {
+            fscanf(hs, "%s %d", &scores[i].plr, &scores[i].scr);
+        }
+        fclose(hs);
 
-        char name[20], score[10];
-        fscanf(hs1, "%s", name);
-        fscanf(hs2, "%s", score);
+        int xxx=500, yyy=450;
+        for (i=0; i<5; i++)
+        {
+            char tmpo[5], tmpn[20];
+            itoa(i+1, tmpo, 10);
+            itoa(scores[i].scr, tmpn, 10);
 
-        iText(617, 370, name, GLUT_BITMAP_TIMES_ROMAN_24);
-        iText(625, 330, score, GLUT_BITMAP_TIMES_ROMAN_24);
-
-        fclose(hs1);
-        fclose(hs2);
+            iText(500, yyy, tmpo, GLUT_BITMAP_TIMES_ROMAN_24);
+            iText(510, yyy, ". ", GLUT_BITMAP_TIMES_ROMAN_24);
+            iText(530, yyy, scores[i].plr, GLUT_BITMAP_TIMES_ROMAN_24);
+            iText(700, yyy, tmpn, GLUT_BITMAP_TIMES_ROMAN_24);
+            yyy -= 50;
+        }
     }
 
     if (gameMode==5) ///credits - DONE!!
@@ -322,34 +392,18 @@ void iDraw()
     if (gameMode==11) ///if player don't win the game, just shows the score
     {
         iClear();
-        iShowBMP(0, 0, "BackgroundImages//losingscore.bmp");
-        FILE *fp, *fp1;
-
-        fp = fopen("highscore.txt", "r");
-        int n;
-        fscanf(fp, "%d", &n);
-
-        if (score>n)
-        {
-            fp1 = fopen("highscore.txt", "w");
-            fprintf(fp1, "%d", score);
-            fclose(fp1);
-        }
-        fclose(fp);
-
-        fp = fopen("highscore.txt", "r");
-        fscanf(fp, "%d", &n);
-
-        iSetColor(215, 240, 247);
-        itoa(score, scoreString, 10);
-        itoa(n, highScoreString, 10);
-
-        iText(626, 237, scoreString, GLUT_BITMAP_TIMES_ROMAN_24);
-        //iText(550, 300, "Your Score: ", GLUT_BITMAP_TIMES_ROMAN_24);
-        iText(626, 310, highScoreString, GLUT_BITMAP_TIMES_ROMAN_24);
-        //iText(550, 340, "High Score: ", GLUT_BITMAP_TIMES_ROMAN_24);
+        iShowBMP(0, 0, "BackgroundImages//losingscore1.bmp");
         iShowBMP2(510, 30, "backtomenu.bmp", 0);
-        fclose(fp);
+
+        iSetColor(225, 225, 225);
+        iFilledRectangle(805, 265, 280, 30); /// ////////////////////////////
+        if (mode==1)
+        {
+            iSetColor(50, 50, 50);
+            iText(810, 275, str, GLUT_BITMAP_HELVETICA_18);
+        }
+
+
     }
 
     if (gameMode==12) ///sakib - if player wins the game, updates high score also ----------needs update
@@ -442,7 +496,6 @@ void iMouse(int button, int state, int mx, int my)
         if (gameMode==4)
         {
             if (mx>=510 && mx<=750 && my>=30 && my<=59) gameMode = -1;
-            printf("%d %d\n", mx, my);
         }
 
         if (gameMode==5)
@@ -461,6 +514,7 @@ void iMouse(int button, int state, int mx, int my)
                 max_beam_count = MAX_BEAM;
                 beamIndex = 0;
                 enemyNumber = 0;
+                len = 0;
                 gameMode = 1;
             }
 
@@ -472,7 +526,9 @@ void iMouse(int button, int state, int mx, int my)
 
         if (gameMode==11)
         {
+            printf("%d %d\n", mx, my);
             if (mx>=510 && mx<=750 && my>=30 && my<=59) gameMode = -1;
+            if (mx>=810 && mx<=1080 && my>=265 && my<=315) mode = 1; //805, 265, 280, 40
         }
 
         if (gameMode==12)
@@ -496,6 +552,27 @@ void iKeyboard(unsigned char key) ///to fire my beam
             beamarray[beamIndex].y = spaceship_pos_y+22.5;
             beamarray[beamIndex].is_shoot = 1;
             beamIndex++;
+        }
+    }
+
+    if (gameMode==11) ///#############################
+    {
+        if (mode==1)
+        {
+            if(key == '\r')
+            {
+                mode = 0;
+                strcpy(str2, str);
+                printf("\n\n\t\t%s\n\n", str2);
+                highScoreUpdate(str2);
+                len = 0;
+                gameMode = -1;
+            }
+            else
+            {
+                str[len] = key;
+                len++;
+            }
         }
     }
 }
