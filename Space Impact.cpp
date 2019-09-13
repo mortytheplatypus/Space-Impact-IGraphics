@@ -161,11 +161,11 @@ void highScoreUpdate(char str2[])
     }
 
 
-    printf("\n\nin function:\n\n");
+    /*printf("\n\nin function:\n\n");
     for (i=0; i<5; i++)
     {
         printf("%s %d\n", scores[i].plr, scores[i].scr);
-    }
+    }*/
 
     p = fopen("highscore.txt", "w");
     for (i=0; i<5; i++)
@@ -389,14 +389,27 @@ void iDraw()
         iShowBMP2(510, 30, "backtomenu.bmp", 0);
     }
 
-    if (gameMode==11) ///if player don't win the game, just shows the score
+    if (gameMode==11) ///if player don't win the game, just shows score, high score and takes name input - DONE!
     {
         iClear();
         iShowBMP(0, 0, "BackgroundImages//losingscore1.bmp");
         iShowBMP2(510, 30, "backtomenu.bmp", 0);
+        char temp1[6], temp2[6], temp3[30];
+        int nn;
+
+        FILE *fp = fopen("highscore.txt", "r");
+        fscanf(fp, "%s %d", &temp3, &nn);
+        fclose(fp);
+
+        itoa(score, temp1, 10);
+        itoa(nn, temp2, 10);
+
+        iSetColor(235, 235, 235);
+        iText(665, 400, temp2, GLUT_BITMAP_TIMES_ROMAN_24);
+        iText(665, 355, temp1, GLUT_BITMAP_TIMES_ROMAN_24);
 
         iSetColor(225, 225, 225);
-        iFilledRectangle(805, 265, 280, 30); /// ////////////////////////////
+        iFilledRectangle(805, 265, 230, 30);
         if (mode==1)
         {
             iSetColor(50, 50, 50);
@@ -406,38 +419,12 @@ void iDraw()
 
     }
 
-    if (gameMode==12) ///sakib - if player wins the game, updates high score also ----------needs update
+    if (gameMode==12) ///if player wins the game, updates high score also ----------needs update
     {
         iClear();
         iShowBMP(0, 0, "BackgroundImages//congratulation.bmp");
-
-        FILE *fp, *fp1;
-
-        fp = fopen("highscore.txt", "r");
-        int n;
-        fscanf(fp, "%d", &n);
-
-        if (score>n)
-        {
-            fp1 = fopen("highscore.txt", "w");
-            fprintf(fp1, "%d", score);
-            fclose(fp1);
-        }
-        fclose(fp);
-
-        fp = fopen("highscore.txt", "r");
-        fscanf(fp, "%d", &n);
-
-        iSetColor(255, 255, 255);
-        itoa(score, scoreString, 10);
-        itoa(n, highScoreString, 10);
-
-        iText(600, 200, scoreString, GLUT_BITMAP_TIMES_ROMAN_24);
-        iText(400, 200, "Score: ", GLUT_BITMAP_TIMES_ROMAN_24);
-        iText(600, 500, highScoreString, GLUT_BITMAP_TIMES_ROMAN_24);
-        iText(400, 500, "High Score: ", GLUT_BITMAP_TIMES_ROMAN_24);
         iShowBMP2(510, 30, "backtomenu.bmp", 0);
-        fclose(fp);
+
     }
 }
 
@@ -563,7 +550,7 @@ void iKeyboard(unsigned char key) ///to fire my beam
             {
                 mode = 0;
                 strcpy(str2, str);
-                printf("\n\n\t\t%s\n\n", str2);
+                //printf("\n\n\t\t%s\n\n", str2);
                 highScoreUpdate(str2);
                 len = 0;
                 gameMode = -1;
