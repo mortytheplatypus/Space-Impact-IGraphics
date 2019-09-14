@@ -433,6 +433,11 @@ void iDraw()
         FILE *fp = fopen("highscore.txt", "r");
         fscanf(fp, "%s %d", &temp3, &nn);
         fclose(fp);
+            
+        if (nn<score)
+        {
+            nn = score;
+        }
 
         itoa(score, temp1, 10);
         itoa(nn, temp2, 10);
