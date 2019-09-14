@@ -1,25 +1,20 @@
 /*
-To do list:
-1. Ask Sakib to complete his tasks ///seems solved
-2. Create "Pause", "Back to Menu", "Exit" menu in game window ///seems solved
-3. Work on saving high score ///seems solved
-4. complete boss-shooting, boss-getting-shot ///seems solved
-**5. Game continues on background even if gameMode!=1 ///seems solved
-**6. Bullet does not decrease after few potion
-7. Create "Pause" menu and "Resume" window ///seems solved
-8. (optional) Are you sure window in exit ///lagbe na
-9. khela jitle high score update kora ///seems solved
+All bugs seems to be fixed.
+Space Impact 2018 by Maruf and Sakib
 */
 
 #include "iGraphics.h"
+#include <string.h>
+#include <stdlib.h>
+#include <stdio.h>
 
 #define MAX_BOSS_BEAM 100
-#define MAX_ENEMY 23 ///eita change korte jeno bhule na jai
+#define MAX_ENEMY 15 ///value may be changed for presentation purpose
 #define MAX_ENEMY_BEAM 10
 #define MAX_POWER 100
 #define MAX_BEAM 150
 
-int i, j, k, power=MAX_POWER, score=0, highScore, max_beam_count = MAX_BEAM;
+int i, j, k, power=MAX_POWER, score=0, highScore, beam_count = MAX_BEAM;
 float intervalForNewEnemy=3000,intervalForEnemyMove=50, intervalForEnemyBeam=2000, intervalForEnemyBeamMove=30;
 float spaceship_pos_x=100, spaceship_pos_y=300;
 float boss_pos_x=1000, boss_pos_y=400, dy=2;
@@ -65,12 +60,11 @@ int enemyBeamNumber;
 typedef struct
 {
     int x, y, alive = 0;
-    int life = 9; ///eita change korte jeno bhule na jai
+    int life = 59; ///value may be changed for presentation purpose
 } BOSS;
 BOSS boss;
 BEAM bossBeamArray[100];
 int bossBeamNumber;
-
 
 void DrawMyBeam(float m, float n)
 {
@@ -109,7 +103,7 @@ void Menubar()
     iText(10,650,"Power : ", GLUT_BITMAP_HELVETICA_18);
     iText(80,650, powerString, GLUT_BITMAP_HELVETICA_18);
 
-    itoa(min(max_beam_count-beamIndex, MAX_BEAM), beamString, 10);
+    itoa(beam_count, beamString, 10);
     iText(200, 620, "Bullets: ", GLUT_BITMAP_HELVETICA_18);
     iText(300,620, beamString, GLUT_BITMAP_HELVETICA_18);
 }
@@ -193,36 +187,37 @@ void iDraw()
 
         iShowBMP2(spaceship_pos_x, spaceship_pos_y, "ship.bmp", 0);
 
-        if (enemyNumber<MAX_ENEMY)
+        if (lifePotion.alive==1)
         {
-            if (lifePotion.alive==1)
+            iShowBMP2(lifePotion.x, lifePotion.y, "red-potion.bmp", 0);
+            if (spaceship_pos_x>lifePotion.x-50 && spaceship_pos_x<lifePotion.x+32 && spaceship_pos_y>lifePotion.y-50 && spaceship_pos_y<lifePotion.y+32)
             {
-                iShowBMP2(lifePotion.x, lifePotion.y, "red-potion.bmp", 0);
-                if (spaceship_pos_x>lifePotion.x-50 && spaceship_pos_x<lifePotion.x+32 && spaceship_pos_y>lifePotion.y-50 && spaceship_pos_y<lifePotion.y+32)
-                {
-                    lifePotion.alive = 0;
-                    lifePotion.y = 680;
-                    power += 10;
-                    power = min(MAX_POWER, power);
-                }
+                lifePotion.alive = 0;
+                lifePotion.y = 680;
+                power += 10;
+                power = min(MAX_POWER, power);
             }
+        }
 
-            if (bulletPotion.alive==1)
+        if (bulletPotion.alive==1)
+        {
+            iShowBMP2(bulletPotion.x, bulletPotion.y, "bomb.bmp", 0);
+            if (spaceship_pos_x>bulletPotion.x-50 && spaceship_pos_x<bulletPotion.x+75 && spaceship_pos_y>bulletPotion.y-50 && spaceship_pos_y<bulletPotion.y+44)
             {
-                iShowBMP2(bulletPotion.x, bulletPotion.y, "bomb.bmp", 0);
-                if (spaceship_pos_x>bulletPotion.x-50 && spaceship_pos_x<bulletPotion.x+75 && spaceship_pos_y>bulletPotion.y-50 && spaceship_pos_y<bulletPotion.y+44)
-                {
-                    bulletPotion.alive = 0;
-                    bulletPotion.y = 680;
-                    max_beam_count += 15;
-                }
+                bulletPotion.alive = 0;
+                bulletPotion.y = 680;
+                beam_count += 15;
+                beam_count = min(150, beam_count);
             }
-            for (j=0; j<beamIndex; j++) ///for shooting my beam
+        }
+        for (j=0; j<beamIndex; j++) ///for shooting my beam
+        {
+            if (beamarray[j].is_shoot==1)
             {
-                if (beamarray[j].is_shoot==1)
+                if (enemyNumber<MAX_ENEMY)
                 {
-                    ///DrawMyBeam(beamarray[j].x, beamarray[j].y);
-                    iShowBMP2(beamarray[j].x, beamarray[j].y, "beam.bmp", 0);
+                    DrawMyBeam(beamarray[j].x, beamarray[j].y);
+                    //iShowBMP2(beamarray[j].x, beamarray[j].y, "beam.bmp", 0);
                     for (k=0; k<enemyNumber; k++) ///checks whether the bullet hits the enemy, if so, both of them go extinct
                     {
                         if (enemyArray[k].alive==1)
@@ -236,64 +231,62 @@ void iDraw()
                         }
                     }
                 }
-            }
 
-            for (j=0; j<enemyNumber; j++)
-            {
-                if (enemyArray[j].alive==1) ///to make sure it has not been hit
+                if (enemyNumber>=MAX_ENEMY)
                 {
-                    iShowBMP2(enemyArray[j].x, enemyArray[j].y, "enemy_ship.bmp", 0);
-                    if (spaceship_pos_x>enemyArray[j].x-50 && spaceship_pos_x<enemyArray[j].x+50 && spaceship_pos_y>enemyArray[j].y-50 && spaceship_pos_y<enemyArray[j].y+50)
-                    {
-                        enemyArray[j].alive = 0;
-                        power-=10;
-                        score+=10;
-                        continue;
-                    }
-                }
+                     //DrawMyBeam(beamarray[j].x, beamarray[j].y);
+                    iShowBMP2(beamarray[j].x, beamarray[j].y, "beam.bmp", 0);
 
-                for (i=0; i<MAX_ENEMY_BEAM; i++)
+                    if (beamarray[j].x>boss.x && beamarray[j].x<boss.x+100 && beamarray[j].y>boss.y && beamarray[j].y<boss.y+101)
                     {
-                        if (enemyBeamArray[j][i].is_shoot==1)
+                        score += 15;
+                        beamarray[j].is_shoot = 0;
+                        boss.life = boss.life-1;
+                        if (boss.life==0)
                         {
-                            //DrawEnemyBeam(enemyBeamArray[j][i].x, enemyBeamArray[j][i].y);
-                            iShowBMP2(enemyBeamArray[j][i].x, enemyBeamArray[j][i].y, "enemy_beam.bmp", 0);
-                            if (enemyBeamArray[j][i].x>spaceship_pos_x && enemyBeamArray[j][i].x<spaceship_pos_x+50 && enemyBeamArray[j][i].y>spaceship_pos_y && enemyBeamArray[j][i].y<spaceship_pos_y+50)
-                            {
-                                power--;
-                                enemyBeamArray[j][i].is_shoot = 0;
-                            }
+                            score += 500;
+                            gameMode = 12;
                         }
                     }
+                }
             }
         }
+
+        for (j=0; j<enemyNumber; j++)
+        {
+            if (enemyArray[j].alive==1) ///to make sure it has not been hit
+            {
+                iShowBMP2(enemyArray[j].x, enemyArray[j].y, "enemy_ship.bmp", 0);
+                if (spaceship_pos_x>enemyArray[j].x-50 && spaceship_pos_x<enemyArray[j].x+50 && spaceship_pos_y>enemyArray[j].y-50 && spaceship_pos_y<enemyArray[j].y+50)
+                {
+                    enemyArray[j].alive = 0;
+                    power-=10;
+                    score+=10;
+                    continue;
+                }
+            }
+
+            for (i=0; i<MAX_ENEMY_BEAM; i++)
+            {
+                if (enemyBeamArray[j][i].is_shoot==1)
+                {
+                    DrawEnemyBeam(enemyBeamArray[j][i].x, enemyBeamArray[j][i].y);
+                    //iShowBMP2(enemyBeamArray[j][i].x, enemyBeamArray[j][i].y, "enemy_beam.bmp", 0);
+                    if (enemyBeamArray[j][i].x>spaceship_pos_x && enemyBeamArray[j][i].x<spaceship_pos_x+50 && enemyBeamArray[j][i].y>spaceship_pos_y && enemyBeamArray[j][i].y<spaceship_pos_y+50)
+                    {
+                        power--;
+                        enemyBeamArray[j][i].is_shoot = 0;
+                    }
+                }
+            }
+        }
+
 
         if (enemyNumber>=MAX_ENEMY)
         {
             if (boss.alive == 1)
             {
                 iShowBMP2(boss.x, boss.y, "monster.bmp", 0);
-
-                for (j=0; j<beamIndex; j++) ///for shooting my beam
-                {
-                    if (beamarray[j].is_shoot==1)
-                    {
-                        //DrawMyBeam(beamarray[j].x, beamarray[j].y);
-                        iShowBMP2(beamarray[j].x, beamarray[j].y, "beam.bmp", 0);
-
-                        if (beamarray[j].x>boss.x && beamarray[j].x<boss.x+100 && beamarray[j].y>boss.y && beamarray[j].y<boss.y+101)
-                        {
-                            score += 15;
-                            beamarray[j].is_shoot = 0;
-                            boss.life = boss.life-1;
-                            if (boss.life==0)
-                            {
-                                score += 500;
-                                gameMode = 12;
-                            }
-                        }
-                    }
-                }
 
                 for (j=0; j<MAX_BOSS_BEAM; j++)
                 {
@@ -305,14 +298,13 @@ void iDraw()
                         {
                             bossBeamArray[j].is_shoot = 0;
                             power -= 15;
-                            break;
                         }
                     }
                 }
             }
         }
 
-        if (power<=0 || beamIndex==max_beam_count)
+        if (power<=0 || beam_count==0)
         {
             gameMode = 11;
         }
@@ -447,9 +439,12 @@ void iMouse(int button, int state, int mx, int my)
             {
                 power=MAX_POWER;
                 score=0;
-                max_beam_count = MAX_BEAM;
+                beam_count = MAX_BEAM;
                 beamIndex = 0;
                 enemyNumber = 0;
+                len = 0;
+                boss_pos_x = 1320;
+                boss_pos_y = 300;
                 gameMode = 1;
             }
 
@@ -466,7 +461,7 @@ void iMouse(int button, int state, int mx, int my)
 
         if (gameMode==1)
         {
-            if (mx>=1211 && mx<=1295 && my>=645 && my<=670) gameMode = 6; ///############### better with another gamemode with only exit and resume button
+            if (mx>=1211 && mx<=1295 && my>=645 && my<=670) gameMode = 6;
 
             if (mx>=1234 && mx<=1295 && my>=615 && my<=650)
             {
@@ -502,10 +497,12 @@ void iMouse(int button, int state, int mx, int my)
             {
                 power=MAX_POWER;
                 score=0;
-                max_beam_count = MAX_BEAM;
+                beam_count = MAX_BEAM;
                 beamIndex = 0;
                 enemyNumber = 0;
                 len = 0;
+                boss_pos_x = 1300;
+                boss_pos_y = 300;
                 gameMode = 1;
             }
 
@@ -544,10 +541,11 @@ void iKeyboard(unsigned char key) ///to fire my beam
             beamarray[beamIndex].y = spaceship_pos_y+22.5;
             beamarray[beamIndex].is_shoot = 1;
             beamIndex++;
+            beam_count--;
         }
     }
 
-    if (gameMode==11 || gameMode==12) ///#############################
+    if (gameMode==11 || gameMode==12) /// for name input
     {
         if (mode==1)
         {
@@ -559,7 +557,7 @@ void iKeyboard(unsigned char key) ///to fire my beam
                 len = 0;
                 gameMode = -1;
             }
-            else
+            else if (key != ' ')
             {
                 str[len] = key;
                 len++;
@@ -595,7 +593,7 @@ void myBeamMove() ///to move my beam
 {
     if (gameMode==1)
     {
-        for (j=0; j<max_beam_count; j++)
+        for (j=0; j<beamIndex; j++)
         {
             beamarray[j].x += 20;
             if (beamarray[j].x > 1310)
@@ -613,22 +611,21 @@ void newEnemyCreate() ///to create new enemy; also creates lifePotion and beamPo
         if (enemyNumber<MAX_ENEMY)
         {
             if (enemyNumber%5==0 && enemyNumber%10!=0) lifePotion.alive = 0;
+            if (enemyNumber%18==0) bulletPotion.alive = 0;
 
-            if (enemyNumber%10==0 && enemyNumber!=0)
+            if (enemyNumber%10==0 && enemyNumber!=0) ///value may be changed for presentation purpose
             {
                 lifePotion.alive = 1;
                 lifePotion.x = 500 + rand()%700;
                 lifePotion.y = rand()%500;
             }
 
-            if (enemyNumber%13==0 && enemyNumber!=0)
+            if (enemyNumber%13==0 && enemyNumber!=0) ///value may be changed for presentation purpose
             {
                 bulletPotion.alive = 1;
                 bulletPotion.x = 600 + rand()%600;
                 bulletPotion.y = 200 + rand()%300;
             }
-
-            if (enemyNumber%18==0) bulletPotion.alive = 0;
 
             enemyArray[enemyNumber].x = 1300;
             enemyArray[enemyNumber].y = (rand()%520);
