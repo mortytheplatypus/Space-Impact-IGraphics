@@ -1,6 +1,12 @@
 /*
 All bugs seems to be fixed.
 Space Impact 2018 by Maruf and Sakib
+
+
+        value may be changed for presentation purpose -
+            i. MAX_ENEMY
+            ii. lifePotion and bulletPotion create time
+            iii. boss.life
 */
 
 #include "iGraphics.h"
@@ -8,7 +14,7 @@ Space Impact 2018 by Maruf and Sakib
 #include <stdlib.h>
 #include <stdio.h>
 
-#define MAX_BOSS_BEAM 100
+#define MAX_BOSS_BEAM 1000
 #define MAX_ENEMY 15 ///value may be changed for presentation purpose
 #define MAX_ENEMY_BEAM 10
 #define MAX_POWER 100
@@ -17,7 +23,7 @@ Space Impact 2018 by Maruf and Sakib
 int i, j, k, power=MAX_POWER, score=0, highScore, beam_count = MAX_BEAM;
 float intervalForNewEnemy=3000,intervalForEnemyMove=50, intervalForEnemyBeam=2000, intervalForEnemyBeamMove=30;
 float spaceship_pos_x=100, spaceship_pos_y=300;
-float boss_pos_x=1000, boss_pos_y=400, dy=2;
+float boss_pos_x=1000, boss_pos_y=400, dy=3;
 char scoreString[6], powerString[6], beamString[6], highScoreString[6];
 int gameMode = -1;
 
@@ -63,7 +69,7 @@ typedef struct
     int life = 59; ///value may be changed for presentation purpose
 } BOSS;
 BOSS boss;
-BEAM bossBeamArray[100];
+BEAM bossBeamArray[MAX_BOSS_BEAM];
 int bossBeamNumber;
 
 void DrawMyBeam(float m, float n)
@@ -162,6 +168,45 @@ void highScoreUpdate(char str2[])
     fclose(p);
 }
 
+void initialize()
+{
+    power=MAX_POWER;
+    score=0;
+    beam_count = MAX_BEAM;
+    beamIndex = 0;
+    enemyNumber = 0;
+    len = 0;
+
+    lifePotion.alive = 0;
+    bulletPotion.alive = 0;
+
+    bossBeamNumber = 0;
+    boss.x = 1300;
+    boss.y = 300;
+    boss.alive = 0;
+    boss.life = 59;
+    for (i=0; i<MAX_BOSS_BEAM; i++)
+    {
+        bossBeamArray[i].is_shoot = 0;
+    }
+
+    spaceship_pos_x=100;
+    spaceship_pos_y=300;
+    for (i=0; i<MAX_BEAM; i++)
+    {
+        beamarray[i].is_shoot = 0;
+    }
+
+    for (i=0; i<MAX_ENEMY; i++)
+    {
+        enemyArray[i].alive = 0;
+        for (j=0; j<MAX_ENEMY_BEAM; j++)
+        {
+            enemyBeamArray[i][j].is_shoot = 0;
+        }
+    }
+}
+
 void iDraw()
 {
     if (gameMode==-1) ///menu - DONE!!
@@ -176,15 +221,7 @@ void iDraw()
         iShowBMP2(520, 203, "MenuImages//5-credits.bmp", 0);
         iShowBMP2(530, 30, "MenuImages//exit.bmp", 0);
 
-
-        power=MAX_POWER;
-        score=0;
-        beam_count = MAX_BEAM;
-        beamIndex = 0;
-        enemyNumber = 0;
-        len = 0;
-        boss_pos_x = 1320;
-        boss_pos_y = 300;
+        initialize();
     }
 
     if (gameMode==1) ///game window - DONE!!
@@ -503,14 +540,7 @@ void iMouse(int button, int state, int mx, int my)
             if (mx>=550 && mx<=699 && my>=350 && my<=395) gameMode = 1;
             if (mx>=525 && mx<=726 && my>=290 && my<=335)
             {
-                power=MAX_POWER;
-                score=0;
-                beam_count = MAX_BEAM;
-                beamIndex = 0;
-                enemyNumber = 0;
-                len = 0;
-                boss_pos_x = 1300;
-                boss_pos_y = 300;
+                initialize();
                 gameMode = 1;
             }
 
@@ -700,12 +730,12 @@ void bossMove() ///to create boss
     {
         if (boss.alive == 1)
         {
-            if (boss.x>1000)
+            if (boss.x>1050)
             {
                 boss.x -= 2;
             }
 
-            if (boss.x<=1000)
+            if (boss.x<=1050)
             {
                 boss.y += dy;
                 if (boss.y<=0 || boss.y>=500)
@@ -748,8 +778,6 @@ void bossBeamMove() ///to move the beams of boss
 
 int main()
 {
-    boss.x = 1300;
-    boss.y = 300;
     iSetTimer(2, myBeamMove);
     iSetTimer(intervalForNewEnemy, newEnemyCreate);
     iSetTimer(intervalForEnemyMove, enemyMove);
