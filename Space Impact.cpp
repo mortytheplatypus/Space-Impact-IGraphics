@@ -166,6 +166,16 @@ void iDraw()
 {
     if (gameMode==-1) ///menu - DONE!!
     {
+        power=MAX_POWER;
+        score=0;
+        beam_count = MAX_BEAM;
+        beamIndex = 0;
+        enemyNumber = 0;
+        len = 0;
+        boss_pos_x = 1320;
+        boss_pos_y = 300;
+        gameMode = 1;
+
         iClear();
         iShowBMP(0, 0, "BackgroundImages//Home.bmp");
         iShowBMP2(200, 550, "MenuImages//title.bmp", 0);
@@ -554,6 +564,11 @@ void iKeyboard(unsigned char key) ///to fire my beam
                 mode = 0;
                 strcpy(str2, str);
                 highScoreUpdate(str2);
+                for (i=0; i<len; i++)
+                {
+                    str[i] = 0;
+                    str2[i] = 0;
+                }
                 len = 0;
                 gameMode = -1;
             }
