@@ -166,16 +166,6 @@ void iDraw()
 {
     if (gameMode==-1) ///menu - DONE!!
     {
-        power=MAX_POWER;
-        score=0;
-        beam_count = MAX_BEAM;
-        beamIndex = 0;
-        enemyNumber = 0;
-        len = 0;
-        boss_pos_x = 1320;
-        boss_pos_y = 300;
-        gameMode = 1;
-
         iClear();
         iShowBMP(0, 0, "BackgroundImages//Home.bmp");
         iShowBMP2(200, 550, "MenuImages//title.bmp", 0);
@@ -185,6 +175,16 @@ void iDraw()
         iShowBMP2(470, 250, "MenuImages//4-highscore.bmp", 0);
         iShowBMP2(520, 203, "MenuImages//5-credits.bmp", 0);
         iShowBMP2(530, 30, "MenuImages//exit.bmp", 0);
+
+
+        power=MAX_POWER;
+        score=0;
+        beam_count = MAX_BEAM;
+        beamIndex = 0;
+        enemyNumber = 0;
+        len = 0;
+        boss_pos_x = 1320;
+        boss_pos_y = 300;
     }
 
     if (gameMode==1) ///game window - DONE!!
@@ -391,7 +391,6 @@ void iDraw()
     {
         iClear();
         iShowBMP(0, 0, "BackgroundImages//losingscore.bmp");
-        iShowBMP2(510, 30, "backtomenu.bmp", 0);
         char temp1[6], temp2[6], temp3[30];
         int nn;
 
@@ -524,14 +523,11 @@ void iMouse(int button, int state, int mx, int my)
 
         if (gameMode==11)
         {
-
-            if (mx>=510 && mx<=750 && my>=30 && my<=59) gameMode = -1;
             if (mx>=810 && mx<=1080 && my>=265 && my<=315) mode = 1; //805, 265, 280, 40
         }
 
         if (gameMode==12)
         {
-            printf("%d %d\n", mx, my); //(660, 35, 230, 30)
             if (mx>=665 && mx<=910 && my>=35 && my<=65) mode = 1;
         }
     }
@@ -559,7 +555,7 @@ void iKeyboard(unsigned char key) ///to fire my beam
     {
         if (mode==1)
         {
-            if(key == '\r')
+            if(key == '\r' && len!=0)
             {
                 mode = 0;
                 strcpy(str2, str);
