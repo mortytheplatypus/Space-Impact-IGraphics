@@ -224,7 +224,7 @@ void iDraw()
         {
             if (beamarray[j].is_shoot==1)
             {
-                if (enemyNumber<MAX_ENEMY)
+                //if (enemyNumber<MAX_ENEMY)
                 {
                     DrawMyBeam(beamarray[j].x, beamarray[j].y);
                     //iShowBMP2(beamarray[j].x, beamarray[j].y, "beam.bmp", 0);
@@ -242,10 +242,10 @@ void iDraw()
                     }
                 }
 
-                if (enemyNumber>=MAX_ENEMY)
+                if (beamarray[j].is_shoot==1 && enemyNumber>=MAX_ENEMY)
                 {
-                     //DrawMyBeam(beamarray[j].x, beamarray[j].y);
-                    iShowBMP2(beamarray[j].x, beamarray[j].y, "beam.bmp", 0);
+                     DrawMyBeam(beamarray[j].x, beamarray[j].y);
+                    //iShowBMP2(beamarray[j].x, beamarray[j].y, "beam.bmp", 0);
 
                     if (beamarray[j].x>boss.x && beamarray[j].x<boss.x+100 && beamarray[j].y>boss.y && beamarray[j].y<boss.y+101)
                     {
@@ -272,7 +272,6 @@ void iDraw()
                     enemyArray[j].alive = 0;
                     power-=10;
                     score+=10;
-                    continue;
                 }
             }
 
@@ -666,18 +665,15 @@ void enemyBeamCreate() ///to create beams for each individual enemy; ok, i guess
 {
     if (gameMode==1)
     {
-        if (enemyNumber<MAX_ENEMY)
+        for (j=0; j<enemyNumber; j++)
         {
-            for (j=0; j<enemyNumber; j++)
+            if (enemyArray[j].alive==1)
             {
-                if (enemyArray[j].alive==1)
+                for (i=0; i<MAX_ENEMY_BEAM; i++)
                 {
-                    for (i=0; i<MAX_ENEMY_BEAM; i++)
-                    {
-                        enemyBeamArray[j][i].x = enemyArray[j].x-15;
-                        enemyBeamArray[j][i].y = enemyArray[j].y+22;
-                        enemyBeamArray[j][i].is_shoot = 1;
-                    }
+                    enemyBeamArray[j][i].x = enemyArray[j].x-15;
+                    enemyBeamArray[j][i].y = enemyArray[j].y+22;
+                    enemyBeamArray[j][i].is_shoot = 1;
                 }
             }
         }
@@ -688,14 +684,11 @@ void enemyBeamMove() ///to move beams of each individual enemy
 {
     if (gameMode==1)
     {
-        if (enemyNumber<MAX_ENEMY)
+        for (j=0; j<enemyNumber; j++)
         {
-            for (j=0; j<enemyNumber; j++)
+            for (i=0; i<MAX_ENEMY_BEAM; i++)
             {
-                for (i=0; i<MAX_ENEMY_BEAM; i++)
-                {
-                    enemyBeamArray[j][i].x -= 25;
-                }
+                enemyBeamArray[j][i].x -= 25;
             }
         }
     }
