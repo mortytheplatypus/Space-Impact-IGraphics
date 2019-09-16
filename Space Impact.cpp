@@ -176,6 +176,8 @@ void initialize()
     beamIndex = 0;
     enemyNumber = 0;
     len = 0;
+    str[0] = '\0';
+    str2[0] = '\0';
 
     lifePotion.alive = 0;
     bulletPotion.alive = 0;
@@ -257,6 +259,7 @@ void iDraw()
                 beam_count = min(150, beam_count);
             }
         }
+
         for (j=0; j<beamIndex; j++) ///for shooting my beam
         {
             if (beamarray[j].is_shoot==1)
@@ -433,7 +436,7 @@ void iDraw()
         FILE *fp = fopen("highscore.txt", "r");
         fscanf(fp, "%s %d", &temp3, &nn);
         fclose(fp);
-            
+
         if (nn<score)
         {
             nn = score;
@@ -487,14 +490,7 @@ void iMouse(int button, int state, int mx, int my)
         {
             if (mx>=490 && mx<=730 && my>=400 && my<=430)
             {
-                power=MAX_POWER;
-                score=0;
-                beam_count = MAX_BEAM;
-                beamIndex = 0;
-                enemyNumber = 0;
-                len = 0;
-                boss_pos_x = 1320;
-                boss_pos_y = 300;
+                initialize();
                 gameMode = 1;
             }
 
@@ -589,10 +585,14 @@ void iKeyboard(unsigned char key) ///to fire my beam
     {
         if (mode==1)
         {
-            if(key == '\r' && len!=0)
+            if(key == '\r')
             {
                 mode = 0;
                 strcpy(str2, str);
+                if (len==0)
+                {
+                    strcpy(str2, "Player");
+                }
                 highScoreUpdate(str2);
                 for (i=0; i<len; i++)
                 {
@@ -602,7 +602,13 @@ void iKeyboard(unsigned char key) ///to fire my beam
                 len = 0;
                 gameMode = -1;
             }
-            else if (key != ' ')
+
+            else if (key == 8)
+            {
+                str[len-1] = '\0';
+                len--;
+            }
+            else if (key != ' ' && len<25)
             {
                 str[len] = key;
                 len++;
@@ -617,7 +623,7 @@ void iSpecialKeyboard(unsigned char key) ///to move my spaceship
     {
         if (key == GLUT_KEY_RIGHT)
         {
-            if (spaceship_pos_x+10<1250) spaceship_pos_x+=10;
+            if (spaceship_pos_x+10<1250 && spaceship_pos_x+200<boss.x) spaceship_pos_x+=10;
         }
         if (key == GLUT_KEY_LEFT)
         {
@@ -789,7 +795,7 @@ int main()
     iSetTimer(intervalForEnemyBeam, enemyBeamCreate);
     iSetTimer(intervalForEnemyBeamMove, enemyBeamMove);
     iSetTimer(50, bossMove);
-    iSetTimer(1000, bossBeamCreate);
+    iSetTimer(800, bossBeamCreate);
     iSetTimer(5, bossBeamMove);
 
     iInitialize(1300, 680, "Game Window!");
